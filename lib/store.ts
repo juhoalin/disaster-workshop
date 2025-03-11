@@ -8,7 +8,7 @@ const isLocalStorageAvailable = () => {
     if (typeof window === "undefined") return false;
     try {
         return typeof localStorage !== "undefined";
-    } catch (e) {
+    } catch (_e) {
         return false;
     }
 };
