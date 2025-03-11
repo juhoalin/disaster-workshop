@@ -167,16 +167,19 @@ export async function createPost(post: PostType): Promise<PostType | null> {
             return null;
         }
 
+        // Cast the returned data to DbPost to ensure TypeScript knows the structure
+        const dbPost = data as DbPost;
+
         // Convert back to our app format
         return {
-            id: data.id,
-            author: data.author,
-            authorRole: data.author_role, // Convert snake_case back to camelCase
-            content: data.content,
-            timestamp: new Date(data.timestamp),
-            likes: data.likes || [],
-            comments: Array.isArray(data.comments)
-                ? data.comments.map((comment: DbComment) => ({
+            id: dbPost.id,
+            author: dbPost.author,
+            authorRole: dbPost.author_role, // Convert snake_case back to camelCase
+            content: dbPost.content,
+            timestamp: new Date(dbPost.timestamp),
+            likes: dbPost.likes || [],
+            comments: Array.isArray(dbPost.comments)
+                ? dbPost.comments.map((comment: DbComment) => ({
                       id: comment.id,
                       author: comment.author,
                       authorRole: comment.author_role, // Convert snake_case back to camelCase

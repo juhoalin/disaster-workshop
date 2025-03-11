@@ -28,6 +28,27 @@ interface PostProps {
     ) => Promise<void>;
 }
 
+// Add a new ClientSideTime component that only renders on the client
+function ClientSideTime({ timestamp }: { timestamp: Date }) {
+    const [formattedTime, setFormattedTime] = useState<string>("");
+
+    useEffect(() => {
+        // Only format the date on the client side
+        setFormattedTime(formatDistanceToNow(timestamp, { addSuffix: true }));
+    }, [timestamp]);
+
+    // Return nothing until the effect runs on client
+    if (!formattedTime) {
+        return <span className="text-xs text-muted-foreground ml-2">...</span>;
+    }
+
+    return (
+        <span className="text-xs text-muted-foreground ml-2">
+            {formattedTime}
+        </span>
+    );
+}
+
 export function Post({ post, onLike, onComment }: PostProps) {
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
@@ -120,11 +141,8 @@ export function Post({ post, onLike, onComment }: PostProps) {
                         >
                             {post.authorRole}
                         </span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                            {formatDistanceToNow(post.timestamp, {
-                                addSuffix: true,
-                            })}
-                        </span>
+                        {/* Replace direct date formatting with client-side component */}
+                        <ClientSideTime timestamp={post.timestamp} />
                     </div>
                     <p>{post.content}</p>
                 </div>
@@ -173,17 +191,14 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                 {getInitials(comment.author)}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div
-                                            className={cn(
-                                                "p-2 rounded-md text-sm flex-1",
-                                                getRoleColor(comment.authorRole)
-                                            )}
-                                        >
-                                            <div className="font-medium flex items-center">
-                                                {comment.author}
+                                        <div className="flex-1">
+                                            <div className="flex items-center">
+                                                <span className="text-sm font-semibold">
+                                                    {comment.author}
+                                                </span>
                                                 <span
                                                     className={cn(
-                                                        "text-xs ml-2 px-1.5 py-0.5 rounded-full text-xs",
+                                                        "text-xs ml-1 px-1.5 py-0.5 rounded-full",
                                                         comment.authorRole ===
                                                             "Admin"
                                                             ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
@@ -198,8 +213,16 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                 >
                                                     {comment.authorRole}
                                                 </span>
+                                                {/* Use the ClientSideTime component for comment timestamps too */}
+                                                <ClientSideTime
+                                                    timestamp={
+                                                        comment.timestamp
+                                                    }
+                                                />
                                             </div>
-                                            <p>{comment.content}</p>
+                                            <p className="text-sm mt-0.5">
+                                                {comment.content}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}
