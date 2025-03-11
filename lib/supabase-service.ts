@@ -168,7 +168,8 @@ export async function createPost(post: PostType): Promise<PostType | null> {
         }
 
         // Cast the returned data to DbPost to ensure TypeScript knows the structure
-        const dbPost = data as DbPost;
+        // Use a double cast through unknown to satisfy TypeScript
+        const dbPost = data as unknown as DbPost;
 
         // Convert back to our app format
         return {
