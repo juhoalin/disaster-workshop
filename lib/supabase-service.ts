@@ -103,7 +103,8 @@ export async function fetchPosts(): Promise<PostType[]> {
     }
 
     // Process the data to ensure timestamps are Date objects and convert to camelCase
-    return data.map((post: DbPost) => {
+    // Cast the data array to the correct type before mapping
+    return (data as unknown as DbPost[]).map((post) => {
         // First convert keys from snake_case to camelCase
         const camelPost = toCamelCase(post as unknown as StringKeyObject);
 
