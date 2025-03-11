@@ -5,10 +5,15 @@ const USER_STORAGE_KEY = "x_feed_user";
 
 // Helper to check if localStorage is available
 const isLocalStorageAvailable = () => {
+    // Only access localStorage in browser environment to prevent hydration mismatches
     if (typeof window === "undefined") return false;
+
     try {
-        return typeof localStorage !== "undefined";
-    } catch (_e) {
+        // Use a more reliable check that doesn't cause hydration mismatches
+        window.localStorage.setItem("__storage_test__", "");
+        window.localStorage.removeItem("__storage_test__");
+        return true;
+    } catch {
         return false;
     }
 };
