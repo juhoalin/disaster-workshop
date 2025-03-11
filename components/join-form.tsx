@@ -97,12 +97,14 @@ export function JoinForm() {
                                 <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="User">User</SelectItem>
-                                <SelectItem value="Moderator">
-                                    Moderator
+                                <SelectItem value="Journalist">
+                                    Journalist
                                 </SelectItem>
-                                <SelectItem value="Admin">Admin</SelectItem>
-                                <SelectItem value="VIP">VIP</SelectItem>
+                                <SelectItem value="Citizen">Citizen</SelectItem>
+                                <SelectItem value="Government">
+                                    Government
+                                </SelectItem>
+                                <SelectItem value="Troll">Troll</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
