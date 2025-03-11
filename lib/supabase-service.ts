@@ -1,9 +1,36 @@
 import { getSupabase } from "./supabase";
-import type { PostType, UserData } from "./types";
+import type { PostType } from "./types";
+
+// Interface for database comment structure
+interface DbComment {
+    id: string;
+    author: string;
+    author_role: string;
+    content: string;
+    timestamp: string;
+}
+
+// Interface for database post structure
+interface DbPost {
+    id: string;
+    author: string;
+    author_role: string;
+    content: string;
+    timestamp: string;
+    likes: string[];
+    comments: DbComment[];
+}
+
+// Interface for objects with string keys
+interface StringKeyObject {
+    [key: string]: unknown;
+}
 
 // Helper function to convert camelCase to snake_case for Supabase
-function toSnakeCase(obj: Record<string, any>): Record<string, any> {
-    const result: Record<string, any> = {};
+// This function is kept for potential future use
+/* eslint-disable @typescript-eslint/no-unused-vars */
+function toSnakeCase(obj: StringKeyObject): StringKeyObject {
+    const result: StringKeyObject = {};
 
     Object.keys(obj).forEach((key) => {
         // Convert camelCase to snake_case
@@ -16,7 +43,7 @@ function toSnakeCase(obj: Record<string, any>): Record<string, any> {
             !(obj[key] instanceof Date) &&
             !Array.isArray(obj[key])
         ) {
-            result[snakeKey] = toSnakeCase(obj[key]);
+            result[snakeKey] = toSnakeCase(obj[key] as StringKeyObject);
         } else {
             result[snakeKey] = obj[key];
         }
@@ -24,10 +51,11 @@ function toSnakeCase(obj: Record<string, any>): Record<string, any> {
 
     return result;
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // Helper function to convert snake_case back to camelCase for our app
-function toCamelCase(obj: Record<string, any>): Record<string, any> {
-    const result: Record<string, any> = {};
+function toCamelCase(obj: StringKeyObject): StringKeyObject {
+    const result: StringKeyObject = {};
 
     Object.keys(obj).forEach((key) => {
         // Convert snake_case to camelCase
@@ -42,10 +70,12 @@ function toCamelCase(obj: Record<string, any>): Record<string, any> {
             !(obj[key] instanceof Date)
         ) {
             result[camelKey] = Array.isArray(obj[key])
-                ? obj[key].map((item: any) =>
-                      typeof item === "object" ? toCamelCase(item) : item
+                ? (obj[key] as unknown[]).map((item) =>
+                      typeof item === "object" && item !== null
+                          ? toCamelCase(item as StringKeyObject)
+                          : item
                   )
-                : toCamelCase(obj[key]);
+                : toCamelCase(obj[key] as StringKeyObject);
         } else {
             result[camelKey] = obj[key];
         }
@@ -73,9 +103,9 @@ export async function fetchPosts(): Promise<PostType[]> {
     }
 
     // Process the data to ensure timestamps are Date objects and convert to camelCase
-    return data.map((post: any) => {
+    return data.map((post: DbPost) => {
         // First convert keys from snake_case to camelCase
-        const camelPost = toCamelCase(post);
+        const camelPost = toCamelCase(post as unknown as StringKeyObject);
 
         // Process dates and nested objects
         return {
@@ -83,8 +113,8 @@ export async function fetchPosts(): Promise<PostType[]> {
             timestamp: new Date(post.timestamp),
             // Handle comments properly - it's a jsonb[] in the database
             comments: Array.isArray(post.comments)
-                ? post.comments.map((comment: any) => ({
-                      ...toCamelCase(comment),
+                ? post.comments.map((comment: DbComment) => ({
+                      ...toCamelCase(comment as unknown as StringKeyObject),
                       timestamp: new Date(comment.timestamp),
                   }))
                 : [],
@@ -145,7 +175,7 @@ export async function createPost(post: PostType): Promise<PostType | null> {
             timestamp: new Date(data.timestamp),
             likes: data.likes || [],
             comments: Array.isArray(data.comments)
-                ? data.comments.map((comment: any) => ({
+                ? data.comments.map((comment: DbComment) => ({
                       id: comment.id,
                       author: comment.author,
                       authorRole: comment.author_role, // Convert snake_case back to camelCase
