@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Post } from "@/components/post";
 import { CreatePost } from "@/components/create-post";
 import type { PostType, UserRole } from "@/lib/types";
-import { getUser } from "@/lib/store";
+import { useUser } from "@/lib/user-context";
 import {
     fetchPosts,
     createPost,
@@ -16,6 +16,7 @@ export function Feed() {
     const [posts, setPosts] = useState<PostType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { user, isChangingUser } = useUser();
 
     useEffect(() => {
         async function loadPosts() {
@@ -36,6 +37,9 @@ export function Feed() {
 
     const addPost = async (newPost: PostType) => {
         try {
+            // Additional check to ensure user is still valid
+            if (!user || isChangingUser) return;
+
             const createdPost = await createPost(newPost);
             if (createdPost) {
                 setPosts([createdPost, ...posts]);
@@ -48,16 +52,16 @@ export function Feed() {
 
     const handleLike = async (postId: string) => {
         try {
+            // Check if user exists and is not changing
+            if (!user || isChangingUser) return;
+
             const post = posts.find((p) => p.id === postId);
             if (!post) return;
 
-            const userData = getUser();
-            if (!userData) return;
-
-            const hasLiked = post.likes.includes(userData.nickname);
+            const hasLiked = post.likes.includes(user.nickname);
             const updatedLikes = hasLiked
-                ? post.likes.filter((user) => user !== userData.nickname)
-                : [...post.likes, userData.nickname];
+                ? post.likes.filter((name) => name !== user.nickname)
+                : [...post.likes, user.nickname];
 
             // Optimistic UI update
             const updatedPosts = posts.map((p) =>
@@ -89,6 +93,9 @@ export function Feed() {
         }
     ) => {
         try {
+            // Check if user exists and is not changing
+            if (!user || isChangingUser) return;
+
             // Optimistic UI update
             const updatedPosts = posts.map((post) => {
                 if (post.id === postId) {

@@ -9,8 +9,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { PostType, UserRole, UserData } from "@/lib/types";
-import { getUser } from "@/lib/store";
+import type { PostType, UserRole } from "@/lib/types";
+import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
 
 interface PostProps {
@@ -52,13 +52,9 @@ function ClientSideTime({ timestamp }: { timestamp: Date }) {
 export function Post({ post, onLike, onComment }: PostProps) {
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
-    const [currentUser, setCurrentUser] = useState<UserData | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
-
-    useEffect(() => {
-        setCurrentUser(getUser());
-    }, []);
+    const { user, isChangingUser } = useUser();
 
     const getRoleColor = (role: string) => {
         switch (role) {
@@ -73,18 +69,16 @@ export function Post({ post, onLike, onComment }: PostProps) {
         }
     };
 
-    const hasLiked = currentUser
-        ? post.likes.includes(currentUser.nickname)
-        : false;
+    const hasLiked = user ? post.likes.includes(user.nickname) : false;
 
     const handleLikeClick = async () => {
-        if (!currentUser || isLiking) return;
+        if (!user || isChangingUser) return;
 
-        setIsLiking(true);
         try {
+            setIsLiking(true);
             await onLike(post.id);
-        } catch (error) {
-            console.error("Failed to like post:", error);
+        } catch (err) {
+            console.error("Error liking post:", err);
         } finally {
             setIsLiking(false);
         }
@@ -92,23 +86,23 @@ export function Post({ post, onLike, onComment }: PostProps) {
 
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!commentText.trim() || !currentUser || isSubmitting) return;
 
-        setIsSubmitting(true);
+        if (!user || !commentText.trim() || isChangingUser) return;
 
         try {
-            const newComment = {
+            setIsSubmitting(true);
+
+            await onComment(post.id, {
                 id: crypto.randomUUID(),
-                author: currentUser.nickname,
-                authorRole: currentUser.role as UserRole,
+                author: user.nickname,
                 content: commentText.trim(),
                 timestamp: new Date(),
-            };
+                authorRole: user.role,
+            });
 
-            await onComment(post.id, newComment);
             setCommentText("");
-        } catch (error) {
-            console.error("Failed to submit comment:", error);
+        } catch (err) {
+            console.error("Error posting comment:", err);
         } finally {
             setIsSubmitting(false);
         }
@@ -155,7 +149,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
                             size="sm"
                             className="flex items-center gap-1"
                             onClick={handleLikeClick}
-                            disabled={!currentUser || isLiking}
+                            disabled={!user || isChangingUser || isLiking}
                         >
                             <Heart
                                 className={cn(
@@ -229,7 +223,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
                             </div>
                         )}
 
-                        {currentUser ? (
+                        {user ? (
                             <form
                                 onSubmit={handleSubmitComment}
                                 className="flex gap-2"
@@ -241,13 +235,15 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                         setCommentText(e.target.value)
                                     }
                                     className="flex-1"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || isChangingUser}
                                 />
                                 <Button
                                     type="submit"
                                     size="sm"
                                     disabled={
-                                        !commentText.trim() || isSubmitting
+                                        !commentText.trim() ||
+                                        isSubmitting ||
+                                        isChangingUser
                                     }
                                 >
                                     {isSubmitting ? (

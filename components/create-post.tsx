@@ -1,8 +1,7 @@
 "use client";
 
 import type React from "react";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -12,8 +11,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import type { PostType, UserData } from "@/lib/types";
-import { getUser } from "@/lib/store";
+import type { PostType } from "@/lib/types";
+import { useUser } from "@/lib/user-context";
 
 interface CreatePostProps {
     onPostCreated: (post: PostType) => Promise<void>;
@@ -22,18 +21,14 @@ interface CreatePostProps {
 export function CreatePost({ onPostCreated }: CreatePostProps) {
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [user, setUser] = useState<UserData | null>(null);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        setUser(getUser());
-    }, []);
+    const { user, isChangingUser } = useUser();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        if (!user || !content.trim()) return;
+        if (!user || !content.trim() || isChangingUser) return;
 
         setIsSubmitting(true);
 
@@ -58,7 +53,8 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
         }
     };
 
-    if (!user) {
+    // Don't render if no user or if user is changing
+    if (!user || isChangingUser) {
         return null;
     }
 
