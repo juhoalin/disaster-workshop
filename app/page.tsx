@@ -1,0 +1,15 @@
+import { Feed } from "@/components/feed"
+import { JoinForm } from "@/components/join-form"
+
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-background">
+      <div className="container max-w-2xl mx-auto py-4 px-4 sm:py-6 sm:px-0">
+        <h1 className="text-3xl font-bold mb-6">Anonymous Feed</h1>
+        <JoinForm />
+        <Feed />
+      </div>
+    </main>
+  )
+}
+
