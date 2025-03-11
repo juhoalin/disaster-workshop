@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Post } from "@/components/post";
 import { CreatePost } from "@/components/create-post";
 import type { PostType, UserRole } from "@/lib/types";
-import { getPosts, savePosts } from "@/lib/store";
+import { getPosts, savePosts, getUser } from "@/lib/store";
 
 export function Feed() {
     const [posts, setPosts] = useState<PostType[]>([]);
@@ -22,9 +22,9 @@ export function Feed() {
     const handleLike = (postId: string) => {
         const updatedPosts = posts.map((post) => {
             if (post.id === postId) {
-                const userData = JSON.parse(
-                    localStorage.getItem("userData") || "{}"
-                );
+                const userData = getUser();
+                if (!userData) return post;
+
                 const hasLiked = post.likes.includes(userData.nickname);
                 return {
                     ...post,

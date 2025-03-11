@@ -2,14 +2,15 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { PostType, UserRole } from "@/lib/types";
+import type { PostType, UserRole, UserData } from "@/lib/types";
+import { getUser } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 interface PostProps {
@@ -30,6 +31,11 @@ interface PostProps {
 export function Post({ post, onLike, onComment }: PostProps) {
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
+    const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+
+    useEffect(() => {
+        setCurrentUser(getUser());
+    }, []);
 
     const getRoleColor = (role: string) => {
         switch (role) {
@@ -44,35 +50,24 @@ export function Post({ post, onLike, onComment }: PostProps) {
         }
     };
 
-    const userDataString = localStorage.getItem("userData");
-    const currentUser = userDataString
-        ? JSON.parse(userDataString).nickname
-        : null;
-    const hasLiked = currentUser ? post.likes.includes(currentUser) : false;
+    const hasLiked = currentUser
+        ? post.likes.includes(currentUser.nickname)
+        : false;
 
     const handleSubmitComment = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!commentText.trim()) return;
+        if (!commentText.trim() || !currentUser) return;
 
-        const userDataString = localStorage.getItem("userData");
-        if (!userDataString) return;
+        const newComment = {
+            id: crypto.randomUUID(),
+            author: currentUser.nickname,
+            authorRole: currentUser.role as UserRole,
+            content: commentText.trim(),
+            timestamp: new Date(),
+        };
 
-        try {
-            const userData = JSON.parse(userDataString);
-
-            const newComment = {
-                id: crypto.randomUUID(),
-                author: userData.nickname,
-                authorRole: userData.role as UserRole,
-                content: commentText.trim(),
-                timestamp: new Date(),
-            };
-
-            onComment(post.id, newComment);
-            setCommentText("");
-        } catch (error) {
-            console.error("Error creating comment:", error);
-        }
+        onComment(post.id, newComment);
+        setCommentText("");
     };
 
     const getInitials = (name: string) => {
