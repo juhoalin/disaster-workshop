@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 interface PostProps {
     post: PostType;
-    onLike: (postId: string) => void;
+    onLike: (postId: string) => Promise<void>;
     onComment: (
         postId: string,
         comment: {
@@ -25,13 +25,15 @@ interface PostProps {
             timestamp: Date;
             authorRole: UserRole;
         }
-    ) => void;
+    ) => Promise<void>;
 }
 
 export function Post({ post, onLike, onComment }: PostProps) {
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
     const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLiking, setIsLiking] = useState(false);
 
     useEffect(() => {
         setCurrentUser(getUser());
@@ -54,20 +56,41 @@ export function Post({ post, onLike, onComment }: PostProps) {
         ? post.likes.includes(currentUser.nickname)
         : false;
 
-    const handleSubmitComment = (e: React.FormEvent) => {
+    const handleLikeClick = async () => {
+        if (!currentUser || isLiking) return;
+
+        setIsLiking(true);
+        try {
+            await onLike(post.id);
+        } catch (error) {
+            console.error("Failed to like post:", error);
+        } finally {
+            setIsLiking(false);
+        }
+    };
+
+    const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!commentText.trim() || !currentUser) return;
+        if (!commentText.trim() || !currentUser || isSubmitting) return;
 
-        const newComment = {
-            id: crypto.randomUUID(),
-            author: currentUser.nickname,
-            authorRole: currentUser.role as UserRole,
-            content: commentText.trim(),
-            timestamp: new Date(),
-        };
+        setIsSubmitting(true);
 
-        onComment(post.id, newComment);
-        setCommentText("");
+        try {
+            const newComment = {
+                id: crypto.randomUUID(),
+                author: currentUser.nickname,
+                authorRole: currentUser.role as UserRole,
+                content: commentText.trim(),
+                timestamp: new Date(),
+            };
+
+            await onComment(post.id, newComment);
+            setCommentText("");
+        } catch (error) {
+            console.error("Failed to submit comment:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const getInitials = (name: string) => {
@@ -113,8 +136,8 @@ export function Post({ post, onLike, onComment }: PostProps) {
                             variant="ghost"
                             size="sm"
                             className="flex items-center gap-1"
-                            onClick={() => onLike(post.id)}
-                            disabled={!currentUser}
+                            onClick={handleLikeClick}
+                            disabled={!currentUser || isLiking}
                         >
                             <Heart
                                 className={cn(
@@ -195,13 +218,22 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                         setCommentText(e.target.value)
                                     }
                                     className="flex-1"
+                                    disabled={isSubmitting}
                                 />
                                 <Button
                                     type="submit"
                                     size="sm"
-                                    disabled={!commentText.trim()}
+                                    disabled={
+                                        !commentText.trim() || isSubmitting
+                                    }
                                 >
-                                    <Send className="h-4 w-4" />
+                                    {isSubmitting ? (
+                                        <span className="animate-pulse">
+                                            ...
+                                        </span>
+                                    ) : (
+                                        <Send className="h-4 w-4" />
+                                    )}
                                 </Button>
                             </form>
                         ) : (

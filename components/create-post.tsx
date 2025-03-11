@@ -16,38 +16,46 @@ import type { PostType, UserData } from "@/lib/types";
 import { getUser } from "@/lib/store";
 
 interface CreatePostProps {
-    onPostCreated: (post: PostType) => void;
+    onPostCreated: (post: PostType) => Promise<void>;
 }
 
 export function CreatePost({ onPostCreated }: CreatePostProps) {
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [user, setUser] = useState<UserData | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         setUser(getUser());
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
 
         if (!user || !content.trim()) return;
 
         setIsSubmitting(true);
 
-        const newPost: PostType = {
-            id: crypto.randomUUID(),
-            author: user.nickname,
-            authorRole: user.role,
-            content: content.trim(),
-            timestamp: new Date(),
-            likes: [],
-            comments: [],
-        };
+        try {
+            const newPost: PostType = {
+                id: crypto.randomUUID(),
+                author: user.nickname,
+                authorRole: user.role,
+                content: content.trim(),
+                timestamp: new Date(),
+                likes: [],
+                comments: [],
+            };
 
-        onPostCreated(newPost);
-        setContent("");
-        setIsSubmitting(false);
+            await onPostCreated(newPost);
+            setContent("");
+        } catch (err) {
+            console.error("Failed to create post:", err);
+            setError("Failed to create post. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!user) {
@@ -67,13 +75,16 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
                         onChange={(e) => setContent(e.target.value)}
                         rows={3}
                     />
+                    {error && (
+                        <p className="text-red-500 text-sm mt-2">{error}</p>
+                    )}
                 </CardContent>
                 <CardFooter className="flex justify-end border-t pt-4">
                     <Button
                         type="submit"
                         disabled={!content.trim() || isSubmitting}
                     >
-                        Post
+                        {isSubmitting ? "Posting..." : "Post"}
                     </Button>
                 </CardFooter>
             </form>
