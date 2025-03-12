@@ -23,7 +23,7 @@ import { useUser } from "@/lib/user-context";
 
 export function JoinForm() {
     const [nickname, setNickname] = useState("");
-    const [role, setRole] = useState<UserRole>("User");
+    const [role, setRole] = useState<UserRole>("Citizen");
     const { user, login, logout, cancelUserChange, isChangingUser } = useUser();
 
     const handleJoin = (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export function JoinForm() {
         logout();
         // Reset form fields for new user
         setNickname("");
-        setRole("User");
+        setRole("Citizen");
     };
 
     const handleCancel = () => {
