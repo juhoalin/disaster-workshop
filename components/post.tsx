@@ -189,7 +189,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const roleImageName = post.authorRole.toLowerCase();
 
     return (
-        <div className={cn("rounded-xl border shadow", roleBackground)}>
+        <div className="rounded-xl border shadow bg-white dark:bg-gray-900">
             <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-transparent">
                 <Avatar>
                     <AvatarImage
