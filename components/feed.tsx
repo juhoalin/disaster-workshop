@@ -226,9 +226,17 @@ export function Feed({ createInputId }: FeedProps = {}) {
             const postToDelete = posts.find((p) => p.id === postId);
             if (!postToDelete) return;
 
-            // Check if user is the author of the post
-            if (postToDelete.author !== user.nickname) {
-                console.error("Not authorized to delete this post");
+            // Double-check if user is the author of the post - checking BOTH nickname and role
+            if (
+                postToDelete.author !== user.nickname ||
+                postToDelete.authorRole !== user.role
+            ) {
+                console.error("Not authorized to delete this post:", {
+                    postAuthor: postToDelete.author,
+                    postAuthorRole: postToDelete.authorRole,
+                    currentUser: user.nickname,
+                    currentRole: user.role,
+                });
                 return;
             }
 
@@ -237,8 +245,8 @@ export function Feed({ createInputId }: FeedProps = {}) {
                 currentPosts.filter((post) => post.id !== postId)
             );
 
-            // Persist to Supabase
-            const success = await deletePost(postId);
+            // Persist to Supabase with user nickname AND role for complete authentication
+            const success = await deletePost(postId, user.nickname, user.role);
 
             if (!success) {
                 // Revert optimistic update on failure
@@ -270,9 +278,17 @@ export function Feed({ createInputId }: FeedProps = {}) {
             );
             if (!commentToDelete) return;
 
-            // Check if user is the author of the comment
-            if (commentToDelete.author !== user.nickname) {
-                console.error("Not authorized to delete this comment");
+            // Double-check if user is the author of the comment - checking BOTH nickname and role
+            if (
+                commentToDelete.author !== user.nickname ||
+                commentToDelete.authorRole !== user.role
+            ) {
+                console.error("Not authorized to delete this comment:", {
+                    commentAuthor: commentToDelete.author,
+                    commentAuthorRole: commentToDelete.authorRole,
+                    currentUser: user.nickname,
+                    currentRole: user.role,
+                });
                 return;
             }
 
@@ -294,8 +310,13 @@ export function Feed({ createInputId }: FeedProps = {}) {
                 })
             );
 
-            // Persist to Supabase
-            const success = await deleteCommentFromPost(postId, commentId);
+            // Persist to Supabase with user nickname AND role for complete authentication
+            const success = await deleteCommentFromPost(
+                postId,
+                commentId,
+                user.nickname,
+                user.role
+            );
 
             if (!success) {
                 // Revert optimistic update on failure
