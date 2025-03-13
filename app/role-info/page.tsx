@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ROLE_PARAMS } from "@/lib/role-params";
+import {
+    USER_ROLES,
+    ROLE_DESCRIPTIONS,
+    ROLE_DISPLAY_NAMES,
+    BADGE_DISPLAY_TEXT,
+} from "@/lib/user-roles";
 
 export default function RoleInfoPage() {
     // Initialize URL state
@@ -52,6 +58,12 @@ export default function RoleInfoPage() {
                                         Role
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Display Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Badge Text
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Default Nickname
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -71,6 +83,12 @@ export default function RoleInfoPage() {
                                             {roleParam.role}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
+                                            {ROLE_DISPLAY_NAMES[roleParam.role]}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {BADGE_DISPLAY_TEXT[roleParam.role]}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
                                             {roleParam.defaultNickname}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -85,6 +103,43 @@ export default function RoleInfoPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4">
+                        Role Descriptions
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {USER_ROLES.map((role) => (
+                            <div
+                                key={role}
+                                className="border rounded-lg p-4 shadow-sm"
+                            >
+                                <h3 className="font-semibold text-lg">
+                                    {role}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                    {ROLE_DESCRIPTIONS[role]}
+                                </p>
+                                <div className="mt-2">
+                                    <span className="text-xs text-gray-500">
+                                        Display name:
+                                    </span>{" "}
+                                    <span className="font-medium">
+                                        {ROLE_DISPLAY_NAMES[role]}
+                                    </span>
+                                </div>
+                                <div className="mt-1">
+                                    <Link
+                                        href={`/?role=${role.toLowerCase()}`}
+                                        className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                                    >
+                                        Try this role
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -122,7 +177,50 @@ export default function RoleInfoPage() {
                                     : ""}
                             </Link>
                         </li>
+                        <li>
+                            <Link
+                                href="/?role=emergency"
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                                Emergency Services:{" "}
+                                {isClient
+                                    ? `${currentUrl}/?role=emergency`
+                                    : ""}
+                            </Link>
+                        </li>
                     </ul>
+                </div>
+
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4">Profile Images</h2>
+                    <p className="mb-4">
+                        Each role has a designated profile image located in the{" "}
+                        <code>/public/profile-images/</code> folder. The
+                        filename pattern is <code>[role].jpg</code> (lowercase),
+                        for example <code>journalist.jpg</code>.
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {USER_ROLES.map((role) => (
+                            <div
+                                key={role}
+                                className="border rounded-lg p-4 shadow-sm flex items-center"
+                            >
+                                <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
+                                    <img
+                                        src={`/profile-images/${role.toLowerCase()}.jpg`}
+                                        alt={`${role} profile`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div>
+                                    <p className="font-medium">{role}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {ROLE_DISPLAY_NAMES[role]}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="mb-4">
