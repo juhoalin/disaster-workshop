@@ -111,32 +111,11 @@ export function Post({ post, onLike, onComment }: PostProps) {
     );
     console.log("Role badge style class:", getRoleBadgeStyle(post.authorRole));
 
-    // Get the background color class and add !important
-    const roleCardBackground = getRoleCardBackground(post.authorRole);
+    // Get the background color class for the user's role
+    const roleBackground = getRoleCardBackground(post.authorRole);
 
-    // Convert Tailwind class to inline style with !important
-    let bgColorStyle = {};
-    if (roleCardBackground.includes("bg-blue-50")) {
-        bgColorStyle = { backgroundColor: "#EFF6FF !important" }; // blue-50
-    } else if (roleCardBackground.includes("bg-green-50")) {
-        bgColorStyle = { backgroundColor: "#F0FDF4 !important" }; // green-50
-    } else if (roleCardBackground.includes("bg-red-50")) {
-        bgColorStyle = { backgroundColor: "#FEF2F2 !important" }; // red-50
-    } else if (roleCardBackground.includes("bg-yellow-50")) {
-        bgColorStyle = { backgroundColor: "#FEFCE8 !important" }; // yellow-50
-    } else if (roleCardBackground.includes("bg-purple-50")) {
-        bgColorStyle = { backgroundColor: "#FAF5FF !important" }; // purple-50
-    } else if (roleCardBackground.includes("bg-pink-50")) {
-        bgColorStyle = { backgroundColor: "#FDF2F8 !important" }; // pink-50
-    } else if (roleCardBackground.includes("bg-orange-50")) {
-        bgColorStyle = { backgroundColor: "#FFF7ED !important" }; // orange-50
-    } else if (roleCardBackground.includes("bg-gray-50")) {
-        bgColorStyle = { backgroundColor: "#F9FAFB !important" }; // gray-50
-    }
-
-    // Apply background color using inline style with !important
     return (
-        <div className="rounded-xl border shadow" style={bgColorStyle}>
+        <div className={cn("rounded-xl border shadow", roleBackground)}>
             <CardHeader className="flex flex-row items-start gap-4 space-y-0">
                 <Avatar>
                     <AvatarFallback>{getInitials(post.author)}</AvatarFallback>

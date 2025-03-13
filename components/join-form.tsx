@@ -19,12 +19,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useUser } from "@/lib/user-context";
+import { cn } from "@/lib/utils";
 import {
     UserRole,
     DEFAULT_ROLE,
     USER_ROLES,
     ROLE_DISPLAY_NAMES,
     ROLE_DESCRIPTIONS,
+    getRoleCardBackground,
+    getRoleBadgeStyle,
 } from "@/lib/user-roles";
 
 export function JoinForm() {
@@ -51,15 +54,32 @@ export function JoinForm() {
     };
 
     if (user && !isChangingUser) {
+        // Get the background color class for the user's role
+        const roleBackground = getRoleCardBackground(user.role);
+        const roleBadge = getRoleBadgeStyle(user.role);
+
         return (
-            <div className="flex items-center justify-between mb-6 p-4 bg-muted rounded-lg">
+            <div
+                className={cn(
+                    "flex items-center justify-between mb-6 p-4 rounded-lg border shadow",
+                    roleBackground
+                )}
+            >
                 <div className="text-sm">
                     <p>
                         Posting as{" "}
                         <span className="font-bold">{user.nickname}</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                        Role: {user.role}
+                    <p className="text-xs">
+                        Role:{" "}
+                        <span
+                            className={cn(
+                                "ml-1 px-1.5 py-0.5 rounded-full",
+                                roleBadge
+                            )}
+                        >
+                            {user.role}
+                        </span>
                     </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleLogout}>
