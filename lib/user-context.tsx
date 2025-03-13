@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useSearchParams } from "next/navigation";
 import type { UserData } from "./types";
-import { getUser, saveUser, clearUser } from "./store";
+import { getUser, saveUser } from "./store";
 import { getRoleFromParam } from "./role-params";
 
 interface UserContextType {

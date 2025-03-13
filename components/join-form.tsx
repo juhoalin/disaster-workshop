@@ -18,16 +18,13 @@ import {
     UserRole,
     ROLE_DISPLAY_NAMES,
     BADGE_DISPLAY_TEXT,
-    ROLE_DESCRIPTIONS,
     getRoleCardBackground,
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
-import { useSearchParams } from "next/navigation";
 
 export function JoinForm() {
     const [nickname, setNickname] = useState("");
     const { user, login } = useUser();
-    const searchParams = useSearchParams();
 
     // Initialize nickname from user data if available
     useEffect(() => {
