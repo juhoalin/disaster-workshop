@@ -11,6 +11,7 @@ import {
     createPost,
     updatePostLikes,
     addCommentToPost,
+    subscribeToPostChanges,
 } from "@/lib/supabase-service";
 
 export function Feed() {
@@ -34,6 +35,39 @@ export function Feed() {
         }
 
         loadPosts();
+
+        // Set up real-time subscription for posts
+        const unsubscribe = subscribeToPostChanges(
+            // Handle new posts
+            (newPost) => {
+                // Make sure we don't have duplicates
+                setPosts((currentPosts) => {
+                    if (currentPosts.find((p) => p.id === newPost.id)) {
+                        return currentPosts;
+                    }
+                    return [newPost, ...currentPosts];
+                });
+            },
+            // Handle updated posts
+            (updatedPost) => {
+                setPosts((currentPosts) =>
+                    currentPosts.map((post) =>
+                        post.id === updatedPost.id ? updatedPost : post
+                    )
+                );
+            },
+            // Handle deleted posts
+            (deletedId) => {
+                setPosts((currentPosts) =>
+                    currentPosts.filter((post) => post.id !== deletedId)
+                );
+            }
+        );
+
+        // Clean up subscription when component unmounts
+        return () => {
+            unsubscribe();
+        };
     }, []);
 
     const addPost = async (newPost: PostType) => {
@@ -43,7 +77,15 @@ export function Feed() {
 
             const createdPost = await createPost(newPost);
             if (createdPost) {
-                setPosts([createdPost, ...posts]);
+                // Check if this post is already in the state (could be added by subscription)
+                setPosts((currentPosts) => {
+                    // If the post is already in the state, don't add it again
+                    if (currentPosts.find((p) => p.id === createdPost.id)) {
+                        return currentPosts;
+                    }
+                    // Otherwise add it to the beginning of the list
+                    return [createdPost, ...currentPosts];
+                });
             }
         } catch (err) {
             console.error("Failed to create post:", err);
@@ -65,21 +107,36 @@ export function Feed() {
                 : [...post.likes, user.nickname];
 
             // Optimistic UI update
-            const updatedPosts = posts.map((p) =>
-                p.id === postId ? { ...p, likes: updatedLikes } : p
+            setPosts((currentPosts) =>
+                currentPosts.map((p) =>
+                    p.id === postId ? { ...p, likes: updatedLikes } : p
+                )
             );
-            setPosts(updatedPosts);
 
             // Persist to Supabase
             const success = await updatePostLikes(postId, updatedLikes);
             if (!success) {
                 // Revert optimistic update on failure
-                setPosts(posts);
+                setPosts((currentPosts) =>
+                    currentPosts.map((p) =>
+                        p.id === postId ? { ...p, likes: post.likes } : p
+                    )
+                );
             }
         } catch (err) {
             console.error("Failed to update likes:", err);
-            // Revert optimistic update on error
-            setPosts(posts);
+            // Find the current post again to revert to its original state
+            const originalPost = posts.find((p) => p.id === postId);
+            if (originalPost) {
+                // Revert optimistic update on error
+                setPosts((currentPosts) =>
+                    currentPosts.map((p) =>
+                        p.id === postId
+                            ? { ...p, likes: originalPost.likes }
+                            : p
+                    )
+                );
+            }
         }
     };
 
@@ -97,28 +154,57 @@ export function Feed() {
             // Check if user exists and is not changing
             if (!user) return;
 
+            // Find the current post
+            const currentPost = posts.find((p) => p.id === postId);
+            if (!currentPost) return;
+
             // Optimistic UI update
-            const updatedPosts = posts.map((post) => {
-                if (post.id === postId) {
-                    return {
-                        ...post,
-                        comments: [...post.comments, comment],
-                    };
-                }
-                return post;
-            });
-            setPosts(updatedPosts);
+            setPosts((currentPosts) =>
+                currentPosts.map((post) => {
+                    if (post.id === postId) {
+                        return {
+                            ...post,
+                            comments: [...post.comments, comment],
+                        };
+                    }
+                    return post;
+                })
+            );
 
             // Persist to Supabase
             const success = await addCommentToPost(postId, comment);
             if (!success) {
                 // Revert optimistic update on failure
-                setPosts(posts);
+                setPosts((currentPosts) =>
+                    currentPosts.map((post) => {
+                        if (post.id === postId) {
+                            return {
+                                ...post,
+                                comments: currentPost.comments,
+                            };
+                        }
+                        return post;
+                    })
+                );
             }
         } catch (err) {
             console.error("Failed to add comment:", err);
-            // Revert optimistic update on error
-            setPosts(posts);
+            // Find the current post again to revert to its original state
+            const originalPost = posts.find((p) => p.id === postId);
+            if (originalPost) {
+                // Revert optimistic update on error
+                setPosts((currentPosts) =>
+                    currentPosts.map((post) => {
+                        if (post.id === postId) {
+                            return {
+                                ...post,
+                                comments: originalPost.comments,
+                            };
+                        }
+                        return post;
+                    })
+                );
+            }
         }
     };
 

@@ -43,9 +43,9 @@ export const ROLE_PARAMS: RoleParamConfig[] = [
         defaultNickname: "Social Influencer",
     },
     {
-        param: "deev",
-        role: "DEEV",
-        defaultNickname: "DEEV Member",
+        param: "emergency",
+        role: "Emergency",
+        defaultNickname: "Emergency Services",
     },
     {
         param: "conspiracy",

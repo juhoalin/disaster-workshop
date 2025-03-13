@@ -6,7 +6,7 @@ export type UserRole =
     | "Health"
     | "Student"
     | "Influencer"
-    | "DEEV"
+    | "Emergency"
     | "Conspiracy"
     | "Other";
 
@@ -18,7 +18,7 @@ export const USER_ROLES: UserRole[] = [
     "Health",
     "Student",
     "Influencer",
-    "DEEV",
+    "Emergency",
     "Conspiracy",
     "Other",
 ];
@@ -44,7 +44,7 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
     Health: "Vika Salminen",
     Student: "Kreetta Ukkosmyrsky",
     Influencer: "Sara Kalikka",
-    DEEV: "Outi Alapajula os. Miettinen",
+    Emergency: "112",
     Conspiracy: "Anu Turta",
     Other: "User",
 };
@@ -57,7 +57,7 @@ export const BADGE_DISPLAY_TEXT: Record<UserRole, string> = {
     Health: "THL Official",
     Student: "Aalto Student",
     Influencer: "Lifestyle Influencer",
-    DEEV: "Citizen (DEEV)",
+    Emergency: "Emergency Services",
     Conspiracy: "Truth Seeker",
     Other: "Citizen",
 };
@@ -71,7 +71,7 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
     Health: "THL",
     Student: "Student",
     Influencer: "Influencer",
-    DEEV: "DEEV",
+    Emergency: "Emergency Services",
     Conspiracy: "Conspiracy Theorist",
     Other: "Other",
 };
@@ -110,10 +110,10 @@ export const ROLE_STYLES: Record<UserRole, RoleStyleConfig> = {
         description:
             "Influencers share their personal experiences and knowledge",
     },
-    DEEV: {
-        cardBackground: "role-bg-deev",
-        badge: "role-badge-deev",
-        description: "DEEV are the good guys",
+    Emergency: {
+        cardBackground: "role-bg-emergency",
+        badge: "role-badge-emergency",
+        description: "Emergency Services",
     },
     Conspiracy: {
         cardBackground: "role-bg-conspiracy",

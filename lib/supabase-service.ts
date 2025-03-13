@@ -1,5 +1,6 @@
 import { getSupabase } from "./supabase";
 import type { PostType } from "./types";
+import { UserRole } from "./user-roles";
 
 // Interface for database comment structure
 interface DbComment {
@@ -276,4 +277,94 @@ export async function addCommentToPost(
         console.error("Exception in addCommentToPost:", err);
         return false;
     }
+}
+
+// Subscribe to real-time post changes
+export function subscribeToPostChanges(
+    onInsert: (post: PostType) => void,
+    onUpdate: (post: PostType) => void,
+    onDelete: (id: string) => void
+): () => void {
+    const supabase = getSupabase();
+
+    // Subscribe to changes in the posts table
+    const subscription = supabase
+        .channel("posts-channel")
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "posts",
+            },
+            (payload) => {
+                // Convert the new post to our application format
+                const dbPost = payload.new as unknown as DbPost;
+                const newPost: PostType = {
+                    id: dbPost.id,
+                    author: dbPost.author,
+                    authorRole: dbPost.author_role as UserRole,
+                    content: dbPost.content,
+                    timestamp: new Date(dbPost.timestamp),
+                    likes: dbPost.likes || [],
+                    comments: Array.isArray(dbPost.comments)
+                        ? dbPost.comments.map((comment: DbComment) => ({
+                              id: comment.id,
+                              author: comment.author,
+                              authorRole: comment.author_role as UserRole,
+                              content: comment.content,
+                              timestamp: new Date(comment.timestamp),
+                          }))
+                        : [],
+                };
+                onInsert(newPost);
+            }
+        )
+        .on(
+            "postgres_changes",
+            {
+                event: "UPDATE",
+                schema: "public",
+                table: "posts",
+            },
+            (payload) => {
+                // Convert the updated post to our application format
+                const dbPost = payload.new as unknown as DbPost;
+                const updatedPost: PostType = {
+                    id: dbPost.id,
+                    author: dbPost.author,
+                    authorRole: dbPost.author_role as UserRole,
+                    content: dbPost.content,
+                    timestamp: new Date(dbPost.timestamp),
+                    likes: dbPost.likes || [],
+                    comments: Array.isArray(dbPost.comments)
+                        ? dbPost.comments.map((comment: DbComment) => ({
+                              id: comment.id,
+                              author: comment.author,
+                              authorRole: comment.author_role as UserRole,
+                              content: comment.content,
+                              timestamp: new Date(comment.timestamp),
+                          }))
+                        : [],
+                };
+                onUpdate(updatedPost);
+            }
+        )
+        .on(
+            "postgres_changes",
+            {
+                event: "DELETE",
+                schema: "public",
+                table: "posts",
+            },
+            (payload) => {
+                onDelete(payload.old.id);
+            }
+        )
+        .subscribe();
+
+    // Return a cleanup function to unsubscribe
+    return () => {
+        supabase.channel("posts-channel").unsubscribe();
+    };
 }

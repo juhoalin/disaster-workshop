@@ -139,7 +139,7 @@
     background-color: rgb(253 242 248); /* bg-pink-50 */
 }
 
-.role-bg-deev {
+.role-bg-emergency {
     background-color: rgb(255 247 237); /* bg-orange-50 */
 }
 
@@ -189,7 +189,7 @@
     color: rgb(157 23 77); /* text-pink-800 */
 }
 
-.role-badge-deev {
+.role-badge-emergency {
     background-color: rgb(255 237 213); /* bg-orange-100 */
     color: rgb(154 52 18); /* text-orange-800 */
 }
