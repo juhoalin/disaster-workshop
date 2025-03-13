@@ -17,6 +17,7 @@ import {
     BADGE_DISPLAY_TEXT,
     getRoleCardBackground,
     getRoleBadgeStyle,
+    USER_ROLES,
 } from "@/lib/user-roles";
 import {
     Popover,
@@ -106,64 +107,133 @@ export function Post({
     const charactersLeft = MAX_COMMENT_LENGTH - commentText.length;
     const isOverLimit = charactersLeft < 0;
 
-    const hasLiked = user ? post.likes.includes(user.nickname) : false;
+    // Check if any user with the current user's role has already liked the post
+    const hasLiked = user
+        ? post.likes.some((like) => {
+              // Handle new format likes (role:nickname)
+              if (like.includes(":")) {
+                  const [likeRole] = like.split(":");
+                  return likeRole === user.role;
+              }
+
+              // Handle old format likes - check if liker is post author with same role
+              if (like === post.author && post.authorRole === user.role) {
+                  return true;
+              }
+
+              // Check if liker has commented with the same role
+              const comment = post.comments.find((c) => c.author === like);
+              if (comment && comment.authorRole === user.role) {
+                  return true;
+              }
+
+              // Check if like is the current user's nickname
+              return like === user.nickname;
+          })
+        : false;
 
     // Get lowercase role name for image mapping for likes popover
     const getLikerRoleImage = (likerName: string) => {
-        // Since we don't have direct access to all users' roles,
-        // we can check if the liker is the post author
-        if (likerName === post.author) {
-            return post.authorRole.toLowerCase();
-        }
+        try {
+            // Handle the new format with role:nickname
+            if (likerName.includes(":")) {
+                const [role] = likerName.split(":");
+                // Ensure role is valid and lowercase
+                return (role || "other").toLowerCase();
+            }
 
-        // Check if the liker has commented on the post
-        const comment = post.comments.find((c) => c.author === likerName);
-        if (comment) {
-            return comment.authorRole.toLowerCase();
-        }
+            // For old format likes - check if liker is the post author
+            if (likerName === post.author) {
+                return post.authorRole.toLowerCase();
+            }
 
-        // If the current user has liked the post, use their role
-        if (user && likerName === user.nickname) {
-            return user.role.toLowerCase();
-        }
+            // Check if the liker has commented on the post
+            const comment = post.comments.find((c) => c.author === likerName);
+            if (comment) {
+                return comment.authorRole.toLowerCase();
+            }
 
-        // Default if we can't determine the role
-        return "other";
+            // If the current user has liked the post, use their role
+            if (user && likerName === user.nickname) {
+                return user.role.toLowerCase();
+            }
+
+            // Default if we can't determine the role
+            return "other";
+        } catch (err) {
+            console.error("Error getting liker role image:", err);
+            return "other";
+        }
     };
 
     // Get the role for a liker
     const getLikerRole = (likerName: string): UserRole => {
-        // Check if the liker is the post author
-        if (likerName === post.author) {
-            return post.authorRole as UserRole;
-        }
+        try {
+            // Handle the new format with role:nickname
+            if (likerName.includes(":")) {
+                const [role] = likerName.split(":");
+                // Check if it's a valid role
+                if (
+                    role &&
+                    Object.values(USER_ROLES).includes(role as UserRole)
+                ) {
+                    return role as UserRole;
+                }
+                return "Other";
+            }
 
-        // Check if the liker has commented on the post
-        const comment = post.comments.find((c) => c.author === likerName);
-        if (comment) {
-            return comment.authorRole as UserRole;
-        }
+            // Check if the liker is the post author
+            if (likerName === post.author) {
+                return post.authorRole as UserRole;
+            }
 
-        // If the current user has liked the post, use their role
-        if (user && likerName === user.nickname) {
-            return user.role;
-        }
+            // Check if the liker has commented on the post
+            const comment = post.comments.find((c) => c.author === likerName);
+            if (comment) {
+                return comment.authorRole as UserRole;
+            }
 
-        // Default if we can't determine the role
-        return "Other";
+            // If the current user has liked the post, use their role
+            if (user && likerName === user.nickname) {
+                return user.role;
+            }
+
+            // Default if we can't determine the role
+            return "Other";
+        } catch (err) {
+            console.error("Error getting liker role:", err);
+            return "Other";
+        }
     };
 
     // Get display name for a liker
     const getLikerDisplayName = (likerName: string): string => {
-        const role = getLikerRole(likerName);
+        try {
+            // Handle the new format with role:nickname
+            if (likerName.includes(":")) {
+                const [role, nickname] = likerName.split(":");
 
-        // If the nickname matches a display name, it's likely a user who should keep their nickname
-        if (Object.values(ROLE_DISPLAY_NAMES).includes(likerName)) {
-            return likerName;
+                // Use the role display name or fallback to the nickname
+                return (
+                    ROLE_DISPLAY_NAMES[role as UserRole] ||
+                    nickname ||
+                    likerName
+                );
+            }
+
+            const role = getLikerRole(likerName);
+
+            // If the nickname matches a display name, it's likely a user who should keep their nickname
+            if (Object.values(ROLE_DISPLAY_NAMES).includes(likerName)) {
+                return likerName;
+            }
+
+            // Return the role-based display name or fallback to the nickname
+            return ROLE_DISPLAY_NAMES[role] || likerName;
+        } catch (err) {
+            console.error("Error getting liker display name:", err);
+            return likerName || "Unknown User";
         }
-
-        // Return the role-based display name or fallback to the nickname
-        return ROLE_DISPLAY_NAMES[role] || likerName;
     };
 
     const handleLikeClick = async () => {
@@ -204,6 +274,19 @@ export function Post({
     };
 
     const getInitials = (name: string) => {
+        if (!name) return "??";
+
+        // For names with spaces (like "Government Official"), use first letters of each word
+        if (name.includes(" ")) {
+            return name
+                .split(" ")
+                .map((part) => part.charAt(0))
+                .join("")
+                .toUpperCase()
+                .substring(0, 2);
+        }
+
+        // For single names, use the first two characters
         return name.substring(0, 2).toUpperCase();
     };
 
@@ -356,16 +439,17 @@ export function Post({
                                                                 src={`/profile-images/${getLikerRoleImage(
                                                                     liker
                                                                 )}.jpg`}
-                                                                alt={liker}
+                                                                alt={getLikerDisplayName(
+                                                                    liker
+                                                                )}
                                                                 className="object-cover"
                                                             />
                                                             <AvatarFallback>
-                                                                {liker
-                                                                    .substring(
-                                                                        0,
-                                                                        2
+                                                                {getInitials(
+                                                                    getLikerDisplayName(
+                                                                        liker
                                                                     )
-                                                                    .toUpperCase()}
+                                                                )}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <span className="text-sm">

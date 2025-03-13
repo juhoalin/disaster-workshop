@@ -110,10 +110,81 @@ export function Feed({ createInputId }: FeedProps = {}) {
             const post = posts.find((p) => p.id === postId);
             if (!post) return;
 
-            const hasLiked = post.likes.includes(user.nickname);
-            const updatedLikes = hasLiked
-                ? post.likes.filter((name) => name !== user.nickname)
-                : [...post.likes, user.nickname];
+            // Check if any user with current user's role has already liked the post
+            const existingLikesWithSameRole = post.likes.filter((like) => {
+                // Handle the new format with role info
+                if (like.includes(":")) {
+                    const [likeRole] = like.split(":");
+                    return likeRole === user.role;
+                }
+
+                // For old format likes, check if the liker is the post author with the same role
+                if (like === post.author && post.authorRole === user.role) {
+                    return true;
+                }
+
+                // For old format, check comments to see if commenter has the same role
+                const comment = post.comments.find((c) => c.author === like);
+                if (comment && comment.authorRole === user.role) {
+                    return true;
+                }
+
+                // For current user's old format likes
+                if (like === user.nickname) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            // Store the like identifier with role information
+            const userIdentifier = `${user.role}:${user.nickname}`;
+
+            // If a user with the same role already liked the post, remove that like
+            // Otherwise add the new like
+            let updatedLikes;
+            if (existingLikesWithSameRole.length > 0) {
+                // Only remove likes if the current user had previously liked (toggle behavior)
+                const currentUserLike = post.likes.find(
+                    (like) =>
+                        like === userIdentifier || // New format exact match
+                        like === user.nickname // Old format exact match
+                );
+
+                if (currentUserLike) {
+                    // Toggle off - remove only the current user's like
+                    updatedLikes = post.likes.filter(
+                        (like) =>
+                            like !== userIdentifier && like !== user.nickname
+                    );
+                } else {
+                    // Replace existing role's like with this user's like
+                    // First remove all likes from the same role
+                    const filteredLikes = post.likes.filter((like) => {
+                        if (like.includes(":")) {
+                            const [likeRole] = like.split(":");
+                            return likeRole !== user.role;
+                        }
+                        // Keep old-format likes from other roles
+                        return !(
+                            like === user.nickname ||
+                            (like === post.author &&
+                                post.authorRole === user.role) ||
+                            post.comments.some(
+                                (c) =>
+                                    c.author === like &&
+                                    c.authorRole === user.role
+                            )
+                        );
+                    });
+
+                    // Then add the new like
+                    updatedLikes = [...filteredLikes, userIdentifier];
+                }
+            } else {
+                // Add the new like
+                updatedLikes = [...post.likes, userIdentifier];
+            }
 
             // Optimistic UI update
             setPosts((currentPosts) =>
