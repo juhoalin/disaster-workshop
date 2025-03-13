@@ -160,43 +160,44 @@
 }
 
 .role-badge-journalist {
-    background-color: rgb(219 234 254); /* bg-blue-100 */
-    color: rgb(30 64 175); /* text-blue-800 */
+    background-color: transparent;
+    color: rgb(0 0 0); /* text-black */
+    border: 1px solid rgb(0 0 0); /* black border */
 }
 
 .role-badge-government {
+    background-color: rgb(191 219 254); /* bg-blue-200 */
+    color: rgb(30 58 138); /* text-blue-900 */
+}
+
+.role-badge-troll {
+    background-color: rgb(255 237 213); /* bg-orange-100 */
+    color: rgb(194 65 12); /* text-orange-700 */
+}
+
+.role-badge-health {
     background-color: rgb(220 252 231); /* bg-green-100 */
     color: rgb(22 101 52); /* text-green-800 */
 }
 
-.role-badge-troll {
-    background-color: rgb(254 226 226); /* bg-red-100 */
-    color: rgb(153 27 27); /* text-red-800 */
-}
-
-.role-badge-health {
-    background-color: rgb(254 249 195); /* bg-yellow-100 */
-    color: rgb(133 77 14); /* text-yellow-800 */
-}
-
 .role-badge-student {
-    background-color: rgb(243 232 255); /* bg-purple-100 */
-    color: rgb(107 33 168); /* text-purple-800 */
+    background-color: rgb(237 233 254); /* bg-violet-100 */
+    color: rgb(91 33 182); /* text-violet-800 */
 }
 
 .role-badge-influencer {
-    background-color: rgb(252 231 243); /* bg-pink-100 */
-    color: rgb(157 23 77); /* text-pink-800 */
+    background: linear-gradient(90deg, rgba(0, 242, 234, 0.2), rgba(255, 0, 80, 0.3));
+    color: rgb(31, 41, 55); /* text-gray-800 */
 }
 
 .role-badge-emergency {
-    background-color: rgb(255 237 213); /* bg-orange-100 */
-    color: rgb(154 52 18); /* text-orange-800 */
+    background-color: rgb(254 202 202); /* bg-red-200 */
+    color: rgb(220 38 38); /* text-red-600 */
 }
 
 .role-badge-conspiracy {
-    background-color: rgb(254 226 226); /* bg-red-100 */
-    color: rgb(153 27 27); /* text-red-800 */
+    background-color: rgba(69, 10, 10, 0.2); /* dark:bg-red-950/20 */
+    color: rgb(0, 0, 0); /* text-black */
 }
 
 .role-badge-other {

@@ -19,7 +19,7 @@ export default function Home() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col lg:flex-row gap-6 pt-4">
                     {/* Left sidebar with sticky app title */}
-                    <div className="lg:w-[18%] lg:sticky lg:top-0 h-fit">
+                    <div className="lg:w-[18%] lg:sticky lg:top-2 h-fit">
                         <div className="py-2 mt-0.5">
                             <h1 className="text-3xl font-bold">
                                 DISASTER SOCIAL
