@@ -48,18 +48,18 @@ function ClientSideTime({ timestamp }: { timestamp: Date }) {
 
     useEffect(() => {
         // Only format the date on the client side
-        setFormattedTime(formatDistanceToNow(timestamp, { addSuffix: true }));
+        // Remove the "about" prefix by replacing it in the formatted string
+        const formatted = formatDistanceToNow(timestamp, { addSuffix: true });
+        setFormattedTime(formatted.replace("about ", ""));
     }, [timestamp]);
 
     // Return nothing until the effect runs on client
     if (!formattedTime) {
-        return <span className="text-xs text-muted-foreground ml-2">...</span>;
+        return <span className="text-xs text-muted-foreground">...</span>;
     }
 
     return (
-        <span className="text-xs text-muted-foreground ml-2">
-            {formattedTime}
-        </span>
+        <span className="text-xs text-muted-foreground">{formattedTime}</span>
     );
 }
 
@@ -199,19 +199,21 @@ export function Post({ post, onLike, onComment }: PostProps) {
                     />
                     <AvatarFallback>{getInitials(post.author)}</AvatarFallback>
                 </Avatar>
-                <div className="space-y-1">
-                    <div className="flex items-center">
-                        <span className="font-semibold">
-                            {authorDisplayName}
-                        </span>
-                        <span
-                            className={cn(
-                                "role-badge ml-2",
-                                getRoleBadgeStyle(post.authorRole)
-                            )}
-                        >
-                            {badgeText}
-                        </span>
+                <div className="space-y-1 flex-1">
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center">
+                            <span className="font-semibold">
+                                {authorDisplayName}
+                            </span>
+                            <span
+                                className={cn(
+                                    "role-badge ml-2",
+                                    getRoleBadgeStyle(post.authorRole)
+                                )}
+                            >
+                                {badgeText}
+                            </span>
+                        </div>
                         <ClientSideTime timestamp={post.timestamp} />
                     </div>
                     <p>{post.content}</p>
@@ -344,22 +346,24 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
-                                                <div className="flex items-center">
-                                                    <span className="text-sm font-semibold">
-                                                        {
-                                                            commentAuthorDisplayName
-                                                        }
-                                                    </span>
-                                                    <span
-                                                        className={cn(
-                                                            "role-badge ml-1",
-                                                            getRoleBadgeStyle(
-                                                                comment.authorRole
-                                                            )
-                                                        )}
-                                                    >
-                                                        {commentBadgeText}
-                                                    </span>
+                                                <div className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center">
+                                                        <span className="text-sm font-semibold">
+                                                            {
+                                                                commentAuthorDisplayName
+                                                            }
+                                                        </span>
+                                                        <span
+                                                            className={cn(
+                                                                "role-badge ml-1",
+                                                                getRoleBadgeStyle(
+                                                                    comment.authorRole
+                                                                )
+                                                            )}
+                                                        >
+                                                            {commentBadgeText}
+                                                        </span>
+                                                    </div>
                                                     <ClientSideTime
                                                         timestamp={
                                                             comment.timestamp
