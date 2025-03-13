@@ -288,8 +288,9 @@ export function subscribeToPostChanges(
     const supabase = getSupabase();
 
     // Subscribe to changes in the posts table
-    const subscription = supabase
-        .channel("posts-channel")
+    const channel = supabase.channel("posts-channel");
+
+    channel
         .on(
             "postgres_changes",
             {
@@ -365,6 +366,6 @@ export function subscribeToPostChanges(
 
     // Return a cleanup function to unsubscribe
     return () => {
-        supabase.channel("posts-channel").unsubscribe();
+        channel.unsubscribe();
     };
 }
