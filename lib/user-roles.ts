@@ -1,5 +1,14 @@
 // Define the available user roles
-export type UserRole = "Journalist" | "Government" | "Troll" | "Health" | "Student" | "Influencer" | "DEEV" | "Conspiracy" | "Troll" | "Other" ;
+export type UserRole =
+    | "Journalist"
+    | "Government"
+    | "Troll"
+    | "Health"
+    | "Student"
+    | "Influencer"
+    | "DEEV"
+    | "Conspiracy"
+    | "Other";
 
 // Array of all possible roles for easy iteration
 export const USER_ROLES: UserRole[] = [
@@ -10,7 +19,7 @@ export const USER_ROLES: UserRole[] = [
     "Student",
     "Influencer",
     "DEEV",
-    "Health",
+    "Conspiracy",
     "Other",
 ];
 
@@ -42,7 +51,7 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
 
 // Role descriptions
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
-    Journalist: "Professional reporter or media personnel",    
+    Journalist: "Professional reporter or media personnel",
     Government: "Government representative or official",
     Troll: "Chaos agent",
     Health: "THL",
@@ -84,7 +93,8 @@ export const ROLE_STYLES: Record<UserRole, RoleStyleConfig> = {
     Influencer: {
         cardBackground: "bg-pink-50 dark:bg-pink-950/30",
         badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-        description: "Influencers share their personal experiences and knowledge",
+        description:
+            "Influencers share their personal experiences and knowledge",
     },
     DEEV: {
         cardBackground: "bg-orange-50 dark:bg-orange-950/30",
@@ -104,13 +114,25 @@ export const ROLE_STYLES: Record<UserRole, RoleStyleConfig> = {
 };
 
 // Utility function to get card background style for a role
-export function getRoleCardBackground(role: UserRole): string {
-    return ROLE_STYLES[role]?.cardBackground || "";
+export function getRoleCardBackground(role: UserRole | string): string {
+    // Ensure the role is valid
+    if (!role || !isValidRole(role)) {
+        console.warn(`Invalid role provided to getRoleCardBackground: ${role}`);
+        return ROLE_STYLES["Other"].cardBackground;
+    }
+    return (
+        ROLE_STYLES[role]?.cardBackground || ROLE_STYLES["Other"].cardBackground
+    );
 }
 
 // Utility function to get badge style for a role
-export function getRoleBadgeStyle(role: UserRole): string {
-    return ROLE_STYLES[role]?.badge || "";
+export function getRoleBadgeStyle(role: UserRole | string): string {
+    // Ensure the role is valid
+    if (!role || !isValidRole(role)) {
+        console.warn(`Invalid role provided to getRoleBadgeStyle: ${role}`);
+        return ROLE_STYLES["Other"].badge;
+    }
+    return ROLE_STYLES[role]?.badge || ROLE_STYLES["Other"].badge;
 }
 
 // Utility function to check if a string is a valid role
