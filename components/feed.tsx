@@ -12,6 +12,8 @@ import {
     updatePostLikes,
     addCommentToPost,
     subscribeToPostChanges,
+    deletePost,
+    deleteCommentFromPost,
 } from "@/lib/supabase-service";
 
 interface FeedProps {
@@ -44,16 +46,20 @@ export function Feed({ createInputId }: FeedProps = {}) {
         const unsubscribe = subscribeToPostChanges(
             // Handle new posts
             (newPost) => {
-                // Make sure we don't have duplicates
-                setPosts((currentPosts) => {
-                    if (currentPosts.find((p) => p.id === newPost.id)) {
-                        return currentPosts;
-                    }
-                    return [newPost, ...currentPosts];
-                });
+                console.log("Received new post:", newPost);
+                setPosts((currentPosts) =>
+                    // Check if post already exists to avoid duplicates
+                    currentPosts.some((p) => p.id === newPost.id)
+                        ? currentPosts
+                        : [newPost, ...currentPosts].sort(
+                              (a, b) =>
+                                  b.timestamp.getTime() - a.timestamp.getTime()
+                          )
+                );
             },
             // Handle updated posts
             (updatedPost) => {
+                console.log("Received updated post:", updatedPost);
                 setPosts((currentPosts) =>
                     currentPosts.map((post) =>
                         post.id === updatedPost.id ? updatedPost : post
@@ -61,20 +67,19 @@ export function Feed({ createInputId }: FeedProps = {}) {
                 );
             },
             // Handle deleted posts
-            (deletedId) => {
+            (deletedPostId) => {
+                console.log("Received deleted post:", deletedPostId);
                 setPosts((currentPosts) =>
-                    currentPosts.filter((post) => post.id !== deletedId)
+                    currentPosts.filter((post) => post.id !== deletedPostId)
                 );
             }
         );
 
-        // Clean up subscription when component unmounts
-        return () => {
-            unsubscribe();
-        };
-    }, []);
+        // Clean up subscription when component unmounts or user changes
+        return unsubscribe;
+    }, [user]);
 
-    const addPost = async (newPost: PostType) => {
+    const handlePostCreated = async (newPost: PostType) => {
         try {
             // Additional check to ensure user is still valid
             if (!user) return;
@@ -212,10 +217,109 @@ export function Feed({ createInputId }: FeedProps = {}) {
         }
     };
 
+    const handleDeletePost = async (postId: string) => {
+        try {
+            // Check if user exists
+            if (!user) return;
+
+            // Find the post to be deleted
+            const postToDelete = posts.find((p) => p.id === postId);
+            if (!postToDelete) return;
+
+            // Check if user is the author of the post
+            if (postToDelete.author !== user.nickname) {
+                console.error("Not authorized to delete this post");
+                return;
+            }
+
+            // Optimistic UI update - remove the post from the list
+            setPosts((currentPosts) =>
+                currentPosts.filter((post) => post.id !== postId)
+            );
+
+            // Persist to Supabase
+            const success = await deletePost(postId);
+
+            if (!success) {
+                // Revert optimistic update on failure
+                setPosts((currentPosts) => [...currentPosts, postToDelete]);
+                // Sort by timestamp descending
+                setPosts((currentPosts) =>
+                    [...currentPosts].sort(
+                        (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+                    )
+                );
+            }
+        } catch (err) {
+            console.error("Error deleting post:", err);
+        }
+    };
+
+    const handleDeleteComment = async (postId: string, commentId: string) => {
+        try {
+            // Check if user exists
+            if (!user) return;
+
+            // Find the post containing the comment
+            const currentPost = posts.find((p) => p.id === postId);
+            if (!currentPost) return;
+
+            // Find the comment to be deleted
+            const commentToDelete = currentPost.comments.find(
+                (c) => c.id === commentId
+            );
+            if (!commentToDelete) return;
+
+            // Check if user is the author of the comment
+            if (commentToDelete.author !== user.nickname) {
+                console.error("Not authorized to delete this comment");
+                return;
+            }
+
+            // Save the original comments for potential rollback
+            const originalComments = [...currentPost.comments];
+
+            // Optimistic UI update
+            setPosts((currentPosts) =>
+                currentPosts.map((post) => {
+                    if (post.id === postId) {
+                        return {
+                            ...post,
+                            comments: post.comments.filter(
+                                (c) => c.id !== commentId
+                            ),
+                        };
+                    }
+                    return post;
+                })
+            );
+
+            // Persist to Supabase
+            const success = await deleteCommentFromPost(postId, commentId);
+
+            if (!success) {
+                // Revert optimistic update on failure
+                setPosts((currentPosts) =>
+                    currentPosts.map((post) => {
+                        if (post.id === postId) {
+                            return {
+                                ...post,
+                                comments: originalComments,
+                            };
+                        }
+                        return post;
+                    })
+                );
+            }
+        } catch (err) {
+            console.error("Error deleting comment:", err);
+        }
+    };
+
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <UserAndCreatePost
-                onPostCreated={addPost}
+                onPostCreated={handlePostCreated}
                 createInputId={createInputId}
             />
 
@@ -244,6 +348,8 @@ export function Feed({ createInputId }: FeedProps = {}) {
                             post={post}
                             onLike={handleLike}
                             onComment={handleComment}
+                            onDeletePost={handleDeletePost}
+                            onDeleteComment={handleDeleteComment}
                         />
                     ))
             )}

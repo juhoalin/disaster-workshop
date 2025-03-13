@@ -369,3 +369,77 @@ export function subscribeToPostChanges(
         channel.unsubscribe();
     };
 }
+
+// Delete a post by its ID
+export async function deletePost(postId: string): Promise<boolean> {
+    const supabase = getSupabase();
+
+    try {
+        const { error } = await supabase
+            .from("posts")
+            .delete()
+            .eq("id", postId);
+
+        if (error) {
+            console.error("Error deleting post:", error);
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error("Exception in deletePost:", err);
+        return false;
+    }
+}
+
+// Delete a comment from a post
+export async function deleteCommentFromPost(
+    postId: string,
+    commentId: string
+): Promise<boolean> {
+    const supabase = getSupabase();
+
+    try {
+        // First get the current post to access its comments
+        const { data: post, error: fetchError } = await supabase
+            .from("posts")
+            .select("comments")
+            .eq("id", postId)
+            .single();
+
+        if (fetchError) {
+            console.error(
+                "Error fetching post for comment deletion:",
+                fetchError
+            );
+            return false;
+        }
+
+        // Handle the case where comments might be null or not an array
+        if (!Array.isArray(post.comments)) {
+            console.error("Post comments are not an array");
+            return false;
+        }
+
+        // Filter out the comment to be deleted
+        const updatedComments = post.comments.filter(
+            (comment) => comment.id !== commentId
+        );
+
+        // Update the post with the new comments array
+        const { error: updateError } = await supabase
+            .from("posts")
+            .update({ comments: updatedComments })
+            .eq("id", postId);
+
+        if (updateError) {
+            console.error("Error removing comment from post:", updateError);
+            return false;
+        }
+
+        return true;
+    } catch (err) {
+        console.error("Exception in deleteCommentFromPost:", err);
+        return false;
+    }
+}

@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { Heart, MessageCircle, Send, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardFooter } from "@/components/ui/card";
@@ -27,6 +27,17 @@ import {
     MentionInput,
     RenderContentWithMentions,
 } from "@/components/ui/mention-input";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const MAX_COMMENT_LENGTH = 280;
 
@@ -43,6 +54,8 @@ interface PostProps {
             authorRole: UserRole;
         }
     ) => Promise<void>;
+    onDeletePost: (postId: string) => Promise<void>;
+    onDeleteComment: (postId: string, commentId: string) => Promise<void>;
 }
 
 // Add a new ClientSideTime component that only renders on the client
@@ -66,12 +79,24 @@ function ClientSideTime({ timestamp }: { timestamp: Date }) {
     );
 }
 
-export function Post({ post, onLike, onComment }: PostProps) {
+export function Post({
+    post,
+    onLike,
+    onComment,
+    onDeletePost,
+    onDeleteComment,
+}: PostProps) {
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
     const { user } = useUser();
+
+    // New states for delete confirmation
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
+        null
+    );
 
     const charactersLeft = MAX_COMMENT_LENGTH - commentText.length;
     const isOverLimit = charactersLeft < 0;
@@ -191,6 +216,19 @@ export function Post({ post, onLike, onComment }: PostProps) {
     // Get lowercase role name for image path
     const roleImageName = post.authorRole.toLowerCase();
 
+    const handleDeletePost = async () => {
+        if (!user) return;
+        await onDeletePost(post.id);
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        if (!user) return;
+        await onDeleteComment(post.id, commentId);
+    };
+
+    // Check if current user is the author of the post
+    const isPostAuthor = user && user.nickname === post.author;
+
     return (
         <div className="rounded-xl border shadow bg-white dark:bg-gray-900">
             <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-transparent">
@@ -217,7 +255,47 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                 {badgeText}
                             </span>
                         </div>
-                        <ClientSideTime timestamp={post.timestamp} />
+                        <div className="flex items-center gap-2">
+                            <ClientSideTime timestamp={post.timestamp} />
+
+                            {/* Delete Post Button - Only show if user is the author */}
+                            {isPostAuthor && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-muted-foreground hover:text-destructive px-1"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Delete Post
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Are you sure you want to delete
+                                                this post? This action cannot be
+                                                undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>
+                                                Cancel
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={handleDeletePost}
+                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            >
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+                        </div>
                     </div>
                     <p>
                         <RenderContentWithMentions content={post.content} />
@@ -315,26 +393,28 @@ export function Post({ post, onLike, onComment }: PostProps) {
                         {post.comments.length > 0 && (
                             <div className="space-y-3">
                                 {post.comments.map((comment) => {
-                                    // Get display name for comment author
+                                    // Check if the current user is the comment author
+                                    const isCommentAuthor =
+                                        user &&
+                                        user.nickname === comment.author;
+
+                                    // Get the comment author display name
                                     const commentAuthorDisplayName =
                                         ROLE_DISPLAY_NAMES[
                                             comment.authorRole as UserRole
                                         ] || comment.author;
 
-                                    // Get badge text for comment
+                                    const commentRoleImageName =
+                                        comment.authorRole.toLowerCase();
                                     const commentBadgeText =
                                         BADGE_DISPLAY_TEXT[
                                             comment.authorRole as UserRole
                                         ] || comment.authorRole;
 
-                                    // Get lowercase role name for comment author image path
-                                    const commentRoleImageName =
-                                        comment.authorRole.toLowerCase();
-
                                     return (
                                         <div
                                             key={comment.id}
-                                            className="flex items-start gap-2"
+                                            className="flex items-start gap-2 text-sm"
                                         >
                                             <Avatar className="h-6 w-6">
                                                 <AvatarImage
@@ -344,38 +424,91 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                     }
                                                     className="object-cover"
                                                 />
-                                                <AvatarFallback className="text-xs">
+                                                <AvatarFallback>
                                                     {getInitials(
                                                         comment.author
                                                     )}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
-                                                <div className="flex items-center justify-between w-full">
-                                                    <div className="flex items-center">
-                                                        <span className="text-sm font-semibold">
-                                                            {
-                                                                commentAuthorDisplayName
-                                                            }
-                                                        </span>
-                                                        <span
-                                                            className={cn(
-                                                                "role-badge ml-1",
-                                                                getRoleBadgeStyle(
-                                                                    comment.authorRole
-                                                                )
-                                                            )}
-                                                        >
-                                                            {commentBadgeText}
-                                                        </span>
-                                                    </div>
-                                                    <ClientSideTime
-                                                        timestamp={
-                                                            comment.timestamp
+                                                <div className="flex items-center gap-1 mb-0.5">
+                                                    <span className="font-medium text-xs">
+                                                        {
+                                                            commentAuthorDisplayName
                                                         }
-                                                    />
+                                                    </span>
+                                                    <span
+                                                        className={cn(
+                                                            "role-badge text-[10px] py-0 px-1.5",
+                                                            getRoleBadgeStyle(
+                                                                comment.authorRole
+                                                            )
+                                                        )}
+                                                    >
+                                                        {commentBadgeText}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground ml-auto">
+                                                        <ClientSideTime
+                                                            timestamp={
+                                                                comment.timestamp
+                                                            }
+                                                        />
+                                                    </span>
+
+                                                    {/* Delete Comment Button - Only show if user is the author */}
+                                                    {isCommentAuthor && (
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="text-muted-foreground hover:text-destructive h-4 w-4 p-0 ml-1"
+                                                                >
+                                                                    <Trash2 className="h-3 w-3" />
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>
+                                                                        Delete
+                                                                        Comment
+                                                                    </AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        Are you
+                                                                        sure you
+                                                                        want to
+                                                                        delete
+                                                                        this
+                                                                        comment?
+                                                                        This
+                                                                        action
+                                                                        cannot
+                                                                        be
+                                                                        undone.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>
+                                                                        Cancel
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        onClick={() =>
+                                                                            handleDeleteComment(
+                                                                                comment.id
+                                                                            )
+                                                                        }
+                                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                    >
+                                                                        Delete
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    )}
                                                 </div>
-                                                <p className="text-sm mt-1">
+                                                <p>
                                                     <RenderContentWithMentions
                                                         content={
                                                             comment.content
