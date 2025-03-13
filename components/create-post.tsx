@@ -22,13 +22,13 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { user, isChangingUser } = useUser();
+    const { user } = useUser();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        if (!user || !content.trim() || isChangingUser) return;
+        if (!user || !content.trim()) return;
 
         setIsSubmitting(true);
 
@@ -53,8 +53,8 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
         }
     };
 
-    // Don't render if no user or if user is changing
-    if (!user || isChangingUser) {
+    // Don't render if no user
+    if (!user) {
         return null;
     }
 

@@ -17,7 +17,7 @@ export function Feed() {
     const [posts, setPosts] = useState<PostType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { user, isChangingUser } = useUser();
+    const { user } = useUser();
 
     useEffect(() => {
         async function loadPosts() {
@@ -39,7 +39,7 @@ export function Feed() {
     const addPost = async (newPost: PostType) => {
         try {
             // Additional check to ensure user is still valid
-            if (!user || isChangingUser) return;
+            if (!user) return;
 
             const createdPost = await createPost(newPost);
             if (createdPost) {
@@ -54,7 +54,7 @@ export function Feed() {
     const handleLike = async (postId: string) => {
         try {
             // Check if user exists and is not changing
-            if (!user || isChangingUser) return;
+            if (!user) return;
 
             const post = posts.find((p) => p.id === postId);
             if (!post) return;
@@ -95,7 +95,7 @@ export function Feed() {
     ) => {
         try {
             // Check if user exists and is not changing
-            if (!user || isChangingUser) return;
+            if (!user) return;
 
             // Optimistic UI update
             const updatedPosts = posts.map((post) => {
