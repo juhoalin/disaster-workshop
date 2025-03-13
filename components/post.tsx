@@ -67,7 +67,7 @@ function ClientSideTime({ timestamp }: { timestamp: Date }) {
         const formatted = formatDistanceToNow(timestamp, { addSuffix: true });
 
         // Make the timestamp display shorter and more concise
-        let shortenedTime = formatted
+        const shortenedTime = formatted
             .replace("about ", "")
             .replace("less than a minute ago", "just now")
             .replace(" minute ago", "m ago")
@@ -102,12 +102,6 @@ export function Post({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
     const { user } = useUser();
-
-    // New states for delete confirmation
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
-        null
-    );
 
     const charactersLeft = MAX_COMMENT_LENGTH - commentText.length;
     const isOverLimit = charactersLeft < 0;
