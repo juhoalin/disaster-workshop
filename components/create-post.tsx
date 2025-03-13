@@ -72,7 +72,7 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
                 <CardContent>
                     <div className="space-y-2">
                         <Textarea
-                            placeholder="What's happening?"
+                            placeholder="What's happening? Use @ to mention others"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             rows={3}

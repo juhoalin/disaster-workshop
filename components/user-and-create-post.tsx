@@ -166,7 +166,7 @@ export function UserAndCreatePost({
                     <div className="space-y-2">
                         <MentionInput
                             id={createInputId}
-                            placeholder="What's happening?"
+                            placeholder="What's happening? Use @ to mention other active users."
                             value={content}
                             onChange={setContent}
                             isTextarea={true}
