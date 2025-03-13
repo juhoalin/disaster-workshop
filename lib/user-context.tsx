@@ -31,10 +31,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Load user from URL parameters or local storage on mount
     useEffect(() => {
         // Get the role parameter from URL
-        const roleParam = searchParams.get("role");
+        const roleParam = searchParams?.get("role");
 
         // Get user role and default nickname based on the parameter
-        const { role, defaultNickname } = getRoleFromParam(roleParam);
+        const { role, defaultNickname } = getRoleFromParam(roleParam || null);
 
         // Check if we already have a stored user
         const storedUser = getUser();
@@ -60,8 +60,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const login = (userData: UserData) => {
         // Preserve the role from URL parameters
-        const roleParam = searchParams.get("role");
-        const { role } = getRoleFromParam(roleParam);
+        const roleParam = searchParams?.get("role");
+        const { role } = getRoleFromParam(roleParam || null);
 
         // Create updated user data with the URL-based role
         const updatedUserData = {
