@@ -9,6 +9,7 @@ import {
     ROLE_DISPLAY_NAMES,
     BADGE_DISPLAY_TEXT,
 } from "@/lib/user-roles";
+import Image from "next/image";
 
 export default function RoleInfoPage() {
     // Initialize URL state
@@ -205,11 +206,12 @@ export default function RoleInfoPage() {
                                 key={role}
                                 className="border rounded-lg p-4 shadow-sm flex items-center"
                             >
-                                <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-                                    <img
+                                <div className="w-12 h-12 rounded-full overflow-hidden mr-3 relative">
+                                    <Image
                                         src={`/profile-images/${role.toLowerCase()}.jpg`}
                                         alt={`${role} profile`}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        className="object-cover"
                                     />
                                 </div>
                                 <div>

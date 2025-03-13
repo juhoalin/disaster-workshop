@@ -18,7 +18,6 @@ import {
     UserRole,
     ROLE_DISPLAY_NAMES,
     BADGE_DISPLAY_TEXT,
-    getRoleCardBackground,
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
 import type { PostType } from "@/lib/types";
