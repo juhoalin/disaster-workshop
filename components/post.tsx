@@ -63,10 +63,21 @@ function ClientSideTime({ timestamp }: { timestamp: Date }) {
     const [formattedTime, setFormattedTime] = useState<string>("");
 
     useEffect(() => {
-        // Only format the date on the client side
-        // Remove the "about" prefix by replacing it in the formatted string
+        // Format the date on client side
         const formatted = formatDistanceToNow(timestamp, { addSuffix: true });
-        setFormattedTime(formatted.replace("about ", ""));
+
+        // Make the timestamp display shorter and more concise
+        let shortenedTime = formatted
+            .replace("about ", "")
+            .replace("less than a minute ago", "just now")
+            .replace(" minute ago", "m ago")
+            .replace(" minutes ago", "m ago")
+            .replace(" hour ago", "h ago")
+            .replace(" hours ago", "h ago")
+            .replace(" day ago", "d ago")
+            .replace(" days ago", "d ago");
+
+        setFormattedTime(shortenedTime);
     }, [timestamp]);
 
     // Return nothing until the effect runs on client
