@@ -18,17 +18,22 @@ interface CreatePostProps {
     onPostCreated: (post: PostType) => Promise<void>;
 }
 
+const MAX_POST_LENGTH = 280;
+
 export function CreatePost({ onPostCreated }: CreatePostProps) {
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { user } = useUser();
 
+    const charactersLeft = MAX_POST_LENGTH - content.length;
+    const isOverLimit = charactersLeft < 0;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
-        if (!user || !content.trim()) return;
+        if (!user || !content.trim() || isOverLimit) return;
 
         setIsSubmitting(true);
 
@@ -65,12 +70,27 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
                     <CardTitle className="text-base">Create a post</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Textarea
-                        placeholder="What's happening?"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        rows={3}
-                    />
+                    <div className="space-y-2">
+                        <Textarea
+                            placeholder="What's happening?"
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            rows={3}
+                            maxLength={MAX_POST_LENGTH}
+                            className={isOverLimit ? "border-red-500" : ""}
+                        />
+                        <div className="flex justify-end">
+                            <span
+                                className={`text-sm ${
+                                    isOverLimit
+                                        ? "text-red-500 font-semibold"
+                                        : "text-muted-foreground"
+                                }`}
+                            >
+                                {charactersLeft} characters left
+                            </span>
+                        </div>
+                    </div>
                     {error && (
                         <p className="text-red-500 text-sm mt-2">{error}</p>
                     )}
@@ -78,7 +98,9 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
                 <CardFooter className="flex justify-end border-t pt-4">
                     <Button
                         type="submit"
-                        disabled={!content.trim() || isSubmitting}
+                        disabled={
+                            !content.trim() || isSubmitting || isOverLimit
+                        }
                     >
                         {isSubmitting ? "Posting..." : "Post"}
                     </Button>

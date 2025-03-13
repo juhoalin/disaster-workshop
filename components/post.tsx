@@ -20,6 +20,8 @@ import {
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
 
+const MAX_COMMENT_LENGTH = 280;
+
 interface PostProps {
     post: PostType;
     onLike: (postId: string) => Promise<void>;
@@ -63,6 +65,9 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const [isLiking, setIsLiking] = useState(false);
     const { user } = useUser();
 
+    const charactersLeft = MAX_COMMENT_LENGTH - commentText.length;
+    const isOverLimit = charactersLeft < 0;
+
     const hasLiked = user ? post.likes.includes(user.nickname) : false;
 
     const handleLikeClick = async () => {
@@ -81,7 +86,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!user || !commentText.trim()) return;
+        if (!user || !commentText.trim() || isOverLimit) return;
 
         try {
             setIsSubmitting(true);
@@ -236,22 +241,42 @@ export function Post({ post, onLike, onComment }: PostProps) {
                         {user ? (
                             <form
                                 onSubmit={handleSubmitComment}
-                                className="flex gap-2"
+                                className="flex flex-col gap-2"
                             >
-                                <Input
-                                    placeholder="Add a comment..."
-                                    value={commentText}
-                                    onChange={(e) =>
-                                        setCommentText(e.target.value)
-                                    }
-                                    className="flex-1"
-                                    disabled={isSubmitting}
-                                />
+                                <div className="relative w-full">
+                                    <Input
+                                        placeholder="Add a comment..."
+                                        value={commentText}
+                                        onChange={(e) =>
+                                            setCommentText(e.target.value)
+                                        }
+                                        className={cn(
+                                            "flex-1",
+                                            isOverLimit && "border-red-500"
+                                        )}
+                                        disabled={isSubmitting}
+                                        maxLength={MAX_COMMENT_LENGTH}
+                                    />
+                                    <div className="flex justify-end mt-1">
+                                        <span
+                                            className={`text-xs ${
+                                                isOverLimit
+                                                    ? "text-red-500 font-semibold"
+                                                    : "text-muted-foreground"
+                                            }`}
+                                        >
+                                            {charactersLeft} characters left
+                                        </span>
+                                    </div>
+                                </div>
                                 <Button
                                     type="submit"
                                     size="sm"
+                                    className="self-end"
                                     disabled={
-                                        !commentText.trim() || isSubmitting
+                                        !commentText.trim() ||
+                                        isSubmitting ||
+                                        isOverLimit
                                     }
                                 >
                                     {isSubmitting ? (
