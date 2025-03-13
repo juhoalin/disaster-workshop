@@ -38,21 +38,21 @@ export interface RoleStyleConfig {
 
 // Role display names (can be different from the enum values)
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
-    Journalist: "YLE Journalist",
-    Government: "Prime Minister",
-    Troll: "Troll",
-    Health: "THL",
-    Student: "Aalto Student",
-    Influencer: "Influencer",
-    DEEV: "DEEV",
-    Conspiracy: "Conspiracy Theorist",
-    Other: "Other",
+    Journalist: "Kalle Keskiaukeama",
+    Government: "Anna Halin",
+    Troll: "Juuso Halpa-Halko",
+    Health: "Vika Salminen",
+    Student: "Kreetta Ukkosmyrsky",
+    Influencer: "Sara Kalikka",
+    DEEV: "Outi Alapajula os. Miettinen",
+    Conspiracy: "Anu Turta",
+    Other: "User",
 };
 
 // Role descriptions
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
     Journalist: "Professional reporter or media personnel",
-    Government: "Government representative or official",
+    Government: "Government representative or official, in this case the Prime Minister",
     Troll: "Chaos agent",
     Health: "THL",
     Student: "Student",
@@ -65,50 +65,50 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 // Style configurations for each role
 export const ROLE_STYLES: Record<UserRole, RoleStyleConfig> = {
     Journalist: {
-        cardBackground: "bg-blue-50 dark:bg-blue-950/30",
-        badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+        cardBackground: "role-bg-journalist",
+        badge: "role-badge-journalist",
         description:
             "Journalists report on events and share reliable information",
     },
     Government: {
-        cardBackground: "bg-green-50 dark:bg-green-950/30",
-        badge: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+        cardBackground: "role-bg-government",
+        badge: "role-badge-government",
         description: "Government officials provide authoritative information",
     },
     Troll: {
-        cardBackground: "bg-red-50 dark:bg-red-950/30",
-        badge: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+        cardBackground: "role-bg-troll",
+        badge: "role-badge-troll",
         description: "Trolls spread chaos and misinformation",
     },
     Health: {
-        cardBackground: "bg-yellow-50 dark:bg-yellow-950/30",
-        badge: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+        cardBackground: "role-bg-health",
+        badge: "role-badge-health",
         description: "Health professionals provide medical information",
     },
     Student: {
-        cardBackground: "bg-purple-50 dark:bg-purple-950/30",
-        badge: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+        cardBackground: "role-bg-student",
+        badge: "role-badge-student",
         description: "Students are learning and sharing knowledge",
     },
     Influencer: {
-        cardBackground: "bg-pink-50 dark:bg-pink-950/30",
-        badge: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
+        cardBackground: "role-bg-influencer",
+        badge: "role-badge-influencer",
         description:
             "Influencers share their personal experiences and knowledge",
     },
     DEEV: {
-        cardBackground: "bg-orange-50 dark:bg-orange-950/30",
-        badge: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+        cardBackground: "role-bg-deev",
+        badge: "role-badge-deev",
         description: "DEEV are the good guys",
     },
     Conspiracy: {
-        cardBackground: "bg-red-50 dark:bg-red-950/30",
-        badge: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+        cardBackground: "role-bg-conspiracy",
+        badge: "role-badge-conspiracy",
         description: "Conspiracy Theorist",
     },
     Other: {
-        cardBackground: "bg-gray-50 dark:bg-gray-950/30",
-        badge: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
+        cardBackground: "role-bg-other",
+        badge: "role-badge-other",
         description: "Other",
     },
 };

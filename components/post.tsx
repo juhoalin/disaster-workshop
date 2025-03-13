@@ -7,13 +7,14 @@ import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { CardFooter, CardHeader } from "@/components/ui/card";
+import { CardHeader, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { PostType } from "@/lib/types";
 import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
 import {
     UserRole,
+    ROLE_DISPLAY_NAMES,
     getRoleCardBackground,
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
@@ -59,12 +60,12 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const [showComments, setShowComments] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
-    const { user, isChangingUser } = useUser();
+    const { user } = useUser();
 
     const hasLiked = user ? post.likes.includes(user.nickname) : false;
 
     const handleLikeClick = async () => {
-        if (!user || isChangingUser) return;
+        if (!user) return;
 
         try {
             setIsLiking(true);
@@ -79,7 +80,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!user || !commentText.trim() || isChangingUser) return;
+        if (!user || !commentText.trim()) return;
 
         try {
             setIsSubmitting(true);
@@ -104,40 +105,38 @@ export function Post({ post, onLike, onComment }: PostProps) {
         return name.substring(0, 2).toUpperCase();
     };
 
-    console.log("Post author role:", post.authorRole);
-    console.log(
-        "Role card background class:",
-        getRoleCardBackground(post.authorRole)
-    );
-    console.log("Role badge style class:", getRoleBadgeStyle(post.authorRole));
+    // Get the display name for the post author
+    const authorDisplayName =
+        ROLE_DISPLAY_NAMES[post.authorRole as UserRole] || post.author;
 
-    // Get the background color class for the user's role
+    // Get the background color class for the post's role
     const roleBackground = getRoleCardBackground(post.authorRole);
 
     return (
         <div className={cn("rounded-xl border shadow", roleBackground)}>
-            <CardHeader className="flex flex-row items-start gap-4 space-y-0">
+            <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-transparent">
                 <Avatar>
                     <AvatarFallback>{getInitials(post.author)}</AvatarFallback>
                 </Avatar>
                 <div className="space-y-1">
                     <div className="flex items-center">
-                        <span className="font-semibold">{post.author}</span>
+                        <span className="font-semibold">
+                            {authorDisplayName}
+                        </span>
                         <span
                             className={cn(
-                                "text-xs ml-2 px-2 py-0.5 rounded-full",
+                                "role-badge ml-2",
                                 getRoleBadgeStyle(post.authorRole)
                             )}
                         >
                             {post.authorRole}
                         </span>
-                        {/* Replace direct date formatting with client-side component */}
                         <ClientSideTime timestamp={post.timestamp} />
                     </div>
                     <p>{post.content}</p>
                 </div>
             </CardHeader>
-            <CardFooter className="flex flex-col border-t pt-4">
+            <CardFooter className="flex flex-col border-t pt-4 bg-transparent">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4">
                         <Button
@@ -145,7 +144,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
                             size="sm"
                             className="flex items-center gap-1"
                             onClick={handleLikeClick}
-                            disabled={!user || isChangingUser || isLiking}
+                            disabled={!user || isLiking}
                         >
                             <Heart
                                 className={cn(
@@ -171,44 +170,55 @@ export function Post({ post, onLike, onComment }: PostProps) {
                     <div className="w-full mt-4 space-y-4">
                         {post.comments.length > 0 && (
                             <div className="space-y-3">
-                                {post.comments.map((comment) => (
-                                    <div
-                                        key={comment.id}
-                                        className="flex items-start gap-2"
-                                    >
-                                        <Avatar className="h-6 w-6">
-                                            <AvatarFallback className="text-xs">
-                                                {getInitials(comment.author)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1">
-                                            <div className="flex items-center">
-                                                <span className="text-sm font-semibold">
-                                                    {comment.author}
-                                                </span>
-                                                <span
-                                                    className={cn(
-                                                        "text-xs ml-1 px-1.5 py-0.5 rounded-full",
-                                                        getRoleBadgeStyle(
-                                                            comment.authorRole
-                                                        )
+                                {post.comments.map((comment) => {
+                                    // Get display name for comment author
+                                    const commentAuthorDisplayName =
+                                        ROLE_DISPLAY_NAMES[
+                                            comment.authorRole as UserRole
+                                        ] || comment.author;
+
+                                    return (
+                                        <div
+                                            key={comment.id}
+                                            className="flex items-start gap-2"
+                                        >
+                                            <Avatar className="h-6 w-6">
+                                                <AvatarFallback className="text-xs">
+                                                    {getInitials(
+                                                        comment.author
                                                     )}
-                                                >
-                                                    {comment.authorRole}
-                                                </span>
-                                                {/* Use the ClientSideTime component for comment timestamps too */}
-                                                <ClientSideTime
-                                                    timestamp={
-                                                        comment.timestamp
-                                                    }
-                                                />
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1">
+                                                <div className="flex items-center">
+                                                    <span className="text-sm font-semibold">
+                                                        {
+                                                            commentAuthorDisplayName
+                                                        }
+                                                    </span>
+                                                    <span
+                                                        className={cn(
+                                                            "role-badge ml-1",
+                                                            getRoleBadgeStyle(
+                                                                comment.authorRole
+                                                            )
+                                                        )}
+                                                    >
+                                                        {comment.authorRole}
+                                                    </span>
+                                                    <ClientSideTime
+                                                        timestamp={
+                                                            comment.timestamp
+                                                        }
+                                                    />
+                                                </div>
+                                                <p className="text-sm mt-1">
+                                                    {comment.content}
+                                                </p>
                                             </div>
-                                            <p className="text-sm mt-0.5">
-                                                {comment.content}
-                                            </p>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
 
@@ -224,15 +234,13 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                         setCommentText(e.target.value)
                                     }
                                     className="flex-1"
-                                    disabled={isSubmitting || isChangingUser}
+                                    disabled={isSubmitting}
                                 />
                                 <Button
                                     type="submit"
                                     size="sm"
                                     disabled={
-                                        !commentText.trim() ||
-                                        isSubmitting ||
-                                        isChangingUser
+                                        !commentText.trim() || isSubmitting
                                     }
                                 >
                                     {isSubmitting ? (

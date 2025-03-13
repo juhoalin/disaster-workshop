@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,70 +11,67 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
 import {
     UserRole,
-    DEFAULT_ROLE,
-    USER_ROLES,
     ROLE_DISPLAY_NAMES,
     ROLE_DESCRIPTIONS,
     getRoleCardBackground,
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
+import { useSearchParams } from "next/navigation";
 
 export function JoinForm() {
     const [nickname, setNickname] = useState("");
-    const [role, setRole] = useState<UserRole>(DEFAULT_ROLE);
-    const { user, login, logout, cancelUserChange, isChangingUser } = useUser();
+    const { user, login } = useUser();
+    const searchParams = useSearchParams();
+
+    // Initialize nickname from user data if available
+    useEffect(() => {
+        if (user?.nickname) {
+            setNickname(user.nickname);
+        }
+    }, [user]);
 
     const handleJoin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (nickname.trim()) {
-            login({ nickname: nickname.trim(), role });
+        if (nickname.trim() && user) {
+            // Only update the nickname, preserve the role from user context
+            login({ nickname: nickname.trim(), role: user.role });
         }
     };
 
-    const handleLogout = () => {
-        logout();
-        // Reset form fields for new user
-        setNickname("");
-        setRole(DEFAULT_ROLE);
+    // Helper function to get user initials for the avatar
+    const getInitials = (name: string) => {
+        return name.substring(0, 2).toUpperCase();
     };
 
-    const handleCancel = () => {
-        cancelUserChange();
-    };
-
-    if (user && !isChangingUser) {
+    if (user) {
         // Get the background color class for the user's role
         const roleBackground = getRoleCardBackground(user.role);
         const roleBadge = getRoleBadgeStyle(user.role);
+        const displayName = ROLE_DISPLAY_NAMES[user.role as UserRole];
 
         return (
             <div
                 className={cn(
-                    "flex items-center justify-between mb-6 p-4 rounded-lg border shadow",
+                    "flex items-center mb-6 p-4 rounded-lg border shadow",
                     roleBackground
                 )}
             >
-                <div className="text-sm">
-                    <p>
-                        Posting as{" "}
-                        <span className="font-bold">{user.nickname}</span>
-                    </p>
+                <Avatar className="h-10 w-10 mr-3">
+                    <AvatarFallback>
+                        {getInitials(user.nickname)}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="text-sm flex-1">
+                    <p className="font-bold">{displayName}</p>
                     <p className="text-xs">
-                        Role:{" "}
                         <span
                             className={cn(
-                                "ml-1 px-1.5 py-0.5 rounded-full",
+                                "px-1.5 py-0.5 rounded-full",
                                 roleBadge
                             )}
                         >
@@ -82,9 +79,6 @@ export function JoinForm() {
                         </span>
                     </p>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                    Change User
-                </Button>
             </div>
         );
     }
@@ -92,11 +86,9 @@ export function JoinForm() {
     return (
         <Card className="mb-6">
             <CardHeader>
-                <CardTitle>
-                    {isChangingUser ? "Change User" : "Join the conversation"}
-                </CardTitle>
+                <CardTitle>Join the conversation</CardTitle>
                 <CardDescription>
-                    Choose a nickname and role to start posting anonymously
+                    Enter your nickname to start posting
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -109,50 +101,14 @@ export function JoinForm() {
                             className="flex-1"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label htmlFor="role" className="text-sm font-medium">
-                            Select your role
-                        </label>
-                        <Select
-                            value={role}
-                            onValueChange={(value) =>
-                                setRole(value as UserRole)
-                            }
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {USER_ROLES.map((roleOption) => (
-                                    <SelectItem
-                                        key={roleOption}
-                                        value={roleOption}
-                                        title={ROLE_DESCRIPTIONS[roleOption]}
-                                    >
-                                        {ROLE_DISPLAY_NAMES[roleOption]}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
                     <div className="flex gap-2 mt-4">
                         <Button
                             type="submit"
                             disabled={!nickname.trim()}
                             className="flex-1"
                         >
-                            {isChangingUser ? "Continue as New User" : "Join"}
+                            Join
                         </Button>
-                        {isChangingUser && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleCancel}
-                                className="flex-1"
-                            >
-                                Cancel
-                            </Button>
-                        )}
                     </div>
                 </form>
             </CardContent>
