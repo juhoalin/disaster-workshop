@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import {
     UserRole,
     ROLE_DISPLAY_NAMES,
+    BADGE_DISPLAY_TEXT,
     getRoleCardBackground,
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
@@ -109,6 +110,10 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const authorDisplayName =
         ROLE_DISPLAY_NAMES[post.authorRole as UserRole] || post.author;
 
+    // Get the badge display text
+    const badgeText =
+        BADGE_DISPLAY_TEXT[post.authorRole as UserRole] || post.authorRole;
+
     // Get the background color class for the post's role
     const roleBackground = getRoleCardBackground(post.authorRole);
 
@@ -129,7 +134,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                 getRoleBadgeStyle(post.authorRole)
                             )}
                         >
-                            {post.authorRole}
+                            {badgeText}
                         </span>
                         <ClientSideTime timestamp={post.timestamp} />
                     </div>
@@ -177,6 +182,12 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                             comment.authorRole as UserRole
                                         ] || comment.author;
 
+                                    // Get badge text for comment
+                                    const commentBadgeText =
+                                        BADGE_DISPLAY_TEXT[
+                                            comment.authorRole as UserRole
+                                        ] || comment.authorRole;
+
                                     return (
                                         <div
                                             key={comment.id}
@@ -204,7 +215,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                             )
                                                         )}
                                                     >
-                                                        {comment.authorRole}
+                                                        {commentBadgeText}
                                                     </span>
                                                     <ClientSideTime
                                                         timestamp={

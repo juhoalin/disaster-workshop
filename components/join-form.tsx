@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import {
     UserRole,
     ROLE_DISPLAY_NAMES,
+    BADGE_DISPLAY_TEXT,
     ROLE_DESCRIPTIONS,
     getRoleCardBackground,
     getRoleBadgeStyle,
@@ -53,6 +54,8 @@ export function JoinForm() {
         const roleBackground = getRoleCardBackground(user.role);
         const roleBadge = getRoleBadgeStyle(user.role);
         const displayName = ROLE_DISPLAY_NAMES[user.role as UserRole];
+        const badgeText =
+            BADGE_DISPLAY_TEXT[user.role as UserRole] || user.role;
 
         return (
             <div
@@ -75,7 +78,7 @@ export function JoinForm() {
                                 roleBadge
                             )}
                         >
-                            {user.role}
+                            {badgeText}
                         </span>
                     </p>
                 </div>

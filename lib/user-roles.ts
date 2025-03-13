@@ -49,10 +49,24 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
     Other: "User",
 };
 
+// Badge display text (what appears in the role badge)
+export const BADGE_DISPLAY_TEXT: Record<UserRole, string> = {
+    Journalist: "Yle Journalist",
+    Government: "Prime Minister",
+    Troll: "Internet Troll",
+    Health: "THL Official",
+    Student: "Aalto Student",
+    Influencer: "Lifestyle Influencer",
+    DEEV: "Citizen (DEEV)",
+    Conspiracy: "Truth Seeker",
+    Other: "Citizen",
+};
+
 // Role descriptions
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
     Journalist: "Professional reporter or media personnel",
-    Government: "Government representative or official, in this case the Prime Minister",
+    Government:
+        "Government representative or official, in this case the Prime Minister",
     Troll: "Chaos agent",
     Health: "THL",
     Student: "Student",
