@@ -442,15 +442,15 @@ export function Post({
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-1 mb-0.5">
-                                                    <span className="font-medium text-xs">
+                                                <div className="flex items-center gap-3 mb-0.5">
+                                                    <span className="font-medium text-base">
                                                         {
                                                             commentAuthorDisplayName
                                                         }
                                                     </span>
                                                     <span
                                                         className={cn(
-                                                            "role-badge text-[10px] py-0 px-1.5",
+                                                            "role-badge text-[8px] py-1 px-1.5 inline-flex items-center leading-none h-[20px] align-middle",
                                                             getRoleBadgeStyle(
                                                                 comment.authorRole
                                                             )
