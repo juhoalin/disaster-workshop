@@ -10,7 +10,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
@@ -22,6 +21,7 @@ import {
 } from "@/lib/user-roles";
 import type { PostType } from "@/lib/types";
 import { Input } from "@/components/ui/input";
+import { MentionInput } from "@/components/ui/mention-input";
 
 interface UserAndCreatePostProps {
     onPostCreated: (post: PostType) => Promise<void>;
@@ -164,11 +164,12 @@ export function UserAndCreatePost({
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2">
-                        <Textarea
+                        <MentionInput
                             id={createInputId}
                             placeholder="What's happening?"
                             value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            onChange={setContent}
+                            isTextarea={true}
                             rows={3}
                             maxLength={MAX_POST_LENGTH}
                             className={isOverLimit ? "border-red-500" : ""}

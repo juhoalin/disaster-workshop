@@ -24,6 +24,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    MentionInput,
+    RenderContentWithMentions,
+} from "@/components/ui/mention-input";
 
 const MAX_COMMENT_LENGTH = 280;
 
@@ -216,7 +220,9 @@ export function Post({ post, onLike, onComment }: PostProps) {
                         </div>
                         <ClientSideTime timestamp={post.timestamp} />
                     </div>
-                    <p>{post.content}</p>
+                    <p>
+                        <RenderContentWithMentions content={post.content} />
+                    </p>
                 </div>
             </CardHeader>
             <CardFooter className="flex flex-col border-t pt-4 bg-transparent">
@@ -371,7 +377,11 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                     />
                                                 </div>
                                                 <p className="text-sm mt-1">
-                                                    {comment.content}
+                                                    <RenderContentWithMentions
+                                                        content={
+                                                            comment.content
+                                                        }
+                                                    />
                                                 </p>
                                             </div>
                                         </div>
@@ -386,12 +396,10 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                 className="flex flex-col gap-2"
                             >
                                 <div className="relative w-full">
-                                    <Input
+                                    <MentionInput
                                         placeholder="Add a comment..."
                                         value={commentText}
-                                        onChange={(e) =>
-                                            setCommentText(e.target.value)
-                                        }
+                                        onChange={setCommentText}
                                         className={cn(
                                             "flex-1",
                                             isOverLimit && "border-red-500"
