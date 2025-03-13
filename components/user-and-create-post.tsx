@@ -25,11 +25,15 @@ import { Input } from "@/components/ui/input";
 
 interface UserAndCreatePostProps {
     onPostCreated: (post: PostType) => Promise<void>;
+    createInputId?: string;
 }
 
 const MAX_POST_LENGTH = 280;
 
-export function UserAndCreatePost({ onPostCreated }: UserAndCreatePostProps) {
+export function UserAndCreatePost({
+    onPostCreated,
+    createInputId,
+}: UserAndCreatePostProps) {
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -161,6 +165,7 @@ export function UserAndCreatePost({ onPostCreated }: UserAndCreatePostProps) {
                 <CardContent>
                     <div className="space-y-2">
                         <Textarea
+                            id={createInputId}
                             placeholder="What's happening?"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}

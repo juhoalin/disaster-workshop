@@ -14,7 +14,11 @@ import {
     subscribeToPostChanges,
 } from "@/lib/supabase-service";
 
-export function Feed() {
+interface FeedProps {
+    createInputId?: string;
+}
+
+export function Feed({ createInputId }: FeedProps = {}) {
     const [posts, setPosts] = useState<PostType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -210,7 +214,10 @@ export function Feed() {
 
     return (
         <div className="space-y-4">
-            <UserAndCreatePost onPostCreated={addPost} />
+            <UserAndCreatePost
+                onPostCreated={addPost}
+                createInputId={createInputId}
+            />
 
             {isLoading ? (
                 <div className="text-center p-8">

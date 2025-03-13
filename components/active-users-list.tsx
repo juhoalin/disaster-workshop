@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     UserRole,
     ROLE_DISPLAY_NAMES,
     BADGE_DISPLAY_TEXT,
