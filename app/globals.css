@@ -4,7 +4,7 @@
 
 @layer base {
     :root {
-        --background: 0 0% 100%;
+        --background: 210 20% 98%; /* Very light grey */
 
         --foreground: 0 0% 3.9%;
 
@@ -186,7 +186,11 @@
 }
 
 .role-badge-influencer {
-    background: linear-gradient(90deg, rgba(0, 242, 234, 0.2), rgba(255, 0, 80, 0.3));
+    background: linear-gradient(
+        90deg,
+        rgba(0, 242, 234, 0.2),
+        rgba(255, 0, 80, 0.3)
+    );
     color: rgb(31, 41, 55); /* text-gray-800 */
 }
 

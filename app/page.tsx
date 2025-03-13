@@ -15,7 +15,7 @@ export default function Home() {
     };
 
     return (
-        <main className="min-h-screen bg-background">
+        <main className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col lg:flex-row gap-6 pt-4">
                     {/* Left sidebar with sticky app title */}
