@@ -5,7 +5,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, Send } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -122,10 +122,18 @@ export function Post({ post, onLike, onComment }: PostProps) {
     // Get the background color class for the post's role
     const roleBackground = getRoleCardBackground(post.authorRole);
 
+    // Get lowercase role name for image path
+    const roleImageName = post.authorRole.toLowerCase();
+
     return (
         <div className={cn("rounded-xl border shadow", roleBackground)}>
             <CardHeader className="flex flex-row items-start gap-4 space-y-0 bg-transparent">
                 <Avatar>
+                    <AvatarImage
+                        src={`/profile-images/${roleImageName}.jpg`}
+                        alt={authorDisplayName}
+                        className="object-cover"
+                    />
                     <AvatarFallback>{getInitials(post.author)}</AvatarFallback>
                 </Avatar>
                 <div className="space-y-1">
@@ -193,12 +201,23 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                             comment.authorRole as UserRole
                                         ] || comment.authorRole;
 
+                                    // Get lowercase role name for comment author image path
+                                    const commentRoleImageName =
+                                        comment.authorRole.toLowerCase();
+
                                     return (
                                         <div
                                             key={comment.id}
                                             className="flex items-start gap-2"
                                         >
                                             <Avatar className="h-6 w-6">
+                                                <AvatarImage
+                                                    src={`/profile-images/${commentRoleImageName}.jpg`}
+                                                    alt={
+                                                        commentAuthorDisplayName
+                                                    }
+                                                    className="object-cover"
+                                                />
                                                 <AvatarFallback className="text-xs">
                                                     {getInitials(
                                                         comment.author

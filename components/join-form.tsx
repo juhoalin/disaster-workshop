@@ -11,7 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
 import {
@@ -54,6 +54,9 @@ export function JoinForm() {
         const badgeText =
             BADGE_DISPLAY_TEXT[user.role as UserRole] || user.role;
 
+        // Get lowercase role name for image path
+        const roleImageName = user.role.toLowerCase();
+
         return (
             <div
                 className={cn(
@@ -62,6 +65,11 @@ export function JoinForm() {
                 )}
             >
                 <Avatar className="h-10 w-10 mr-3">
+                    <AvatarImage
+                        src={`/profile-images/${roleImageName}.jpg`}
+                        alt={displayName}
+                        className="object-cover"
+                    />
                     <AvatarFallback>
                         {getInitials(user.nickname)}
                     </AvatarFallback>
