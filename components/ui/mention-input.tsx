@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import {
-    UserRole,
-    USER_ROLES,
-    ROLE_DISPLAY_NAMES,
-    BADGE_DISPLAY_TEXT,
-    getRoleBadgeStyle,
-} from "@/lib/user-roles";
+import { UserRole, USER_ROLES, ROLE_DISPLAY_NAMES } from "@/lib/user-roles";
 import { useUser } from "@/lib/user-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -46,6 +39,7 @@ export function MentionInput({
     const [mentioning, setMentioning] = useState(false);
     const [mentionQuery, setMentionQuery] = useState("");
     const [mentionStart, setMentionStart] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [cursorPosition, setCursorPosition] = useState(0);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);

@@ -8,7 +8,6 @@ import { Heart, MessageCircle, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import type { PostType } from "@/lib/types";
 import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
@@ -186,7 +185,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const badgeText =
         BADGE_DISPLAY_TEXT[post.authorRole as UserRole] || post.authorRole;
 
-    // Get the background color class for the post's role
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const roleBackground = getRoleCardBackground(post.authorRole);
 
     // Get lowercase role name for image path

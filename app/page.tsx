@@ -21,7 +21,7 @@ export default function Home() {
                     {/* Left sidebar with sticky app title */}
                     <div className="lg:w-[18%] lg:sticky lg:top-2 h-fit">
                         <div className="py-2 mt-0.5">
-                            <h1 className="text-3xl font-bold">
+                            <h1 className="text-3xl font-bold italic">
                                 DISASTER SOCIAL
                             </h1>
                             <Button
