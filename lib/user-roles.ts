@@ -53,7 +53,7 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
 export const BADGE_DISPLAY_TEXT: Record<UserRole, string> = {
     Journalist: "Yle Journalist",
     Government: "Prime Minister",
-    Troll: "Internet Troll",
+    Troll: "Political Troll",
     Health: "THL Official",
     Student: "Aalto Student",
     Influencer: "Lifestyle Influencer",
