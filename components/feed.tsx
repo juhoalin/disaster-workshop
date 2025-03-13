@@ -226,16 +226,12 @@ export function Feed({ createInputId }: FeedProps = {}) {
             const postToDelete = posts.find((p) => p.id === postId);
             if (!postToDelete) return;
 
-            // Double-check if user is the author of the post - checking BOTH nickname and role
-            if (
-                postToDelete.author !== user.nickname ||
-                postToDelete.authorRole !== user.role
-            ) {
+            // Check if user has the same role as the post author
+            if (postToDelete.authorRole !== user.role) {
                 console.error("Not authorized to delete this post:", {
-                    postAuthor: postToDelete.author,
                     postAuthorRole: postToDelete.authorRole,
-                    currentUser: user.nickname,
                     currentRole: user.role,
+                    message: "You can only delete posts from your own role",
                 });
                 return;
             }
@@ -245,7 +241,7 @@ export function Feed({ createInputId }: FeedProps = {}) {
                 currentPosts.filter((post) => post.id !== postId)
             );
 
-            // Persist to Supabase with user nickname AND role for complete authentication
+            // Persist to Supabase with user nickname AND role for authentication
             const success = await deletePost(postId, user.nickname, user.role);
 
             if (!success) {
@@ -278,16 +274,12 @@ export function Feed({ createInputId }: FeedProps = {}) {
             );
             if (!commentToDelete) return;
 
-            // Double-check if user is the author of the comment - checking BOTH nickname and role
-            if (
-                commentToDelete.author !== user.nickname ||
-                commentToDelete.authorRole !== user.role
-            ) {
+            // Check if user has the same role as the comment author
+            if (commentToDelete.authorRole !== user.role) {
                 console.error("Not authorized to delete this comment:", {
-                    commentAuthor: commentToDelete.author,
                     commentAuthorRole: commentToDelete.authorRole,
-                    currentUser: user.nickname,
                     currentRole: user.role,
+                    message: "You can only delete comments from your own role",
                 });
                 return;
             }
@@ -310,7 +302,7 @@ export function Feed({ createInputId }: FeedProps = {}) {
                 })
             );
 
-            // Persist to Supabase with user nickname AND role for complete authentication
+            // Persist to Supabase with user nickname AND role for authentication
             const success = await deleteCommentFromPost(
                 postId,
                 commentId,

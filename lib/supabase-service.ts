@@ -370,7 +370,7 @@ export function subscribeToPostChanges(
     };
 }
 
-// Delete a post by its ID - only if the current user is the exact same user who created it
+// Delete a post by its ID - any user with the same role can delete
 export async function deletePost(
     postId: string,
     currentUserNickname: string,
@@ -379,7 +379,7 @@ export async function deletePost(
     const supabase = getSupabase();
 
     try {
-        // First get the post to verify both nickname and role for complete identity check
+        // First get the post to verify role ownership
         const { data: post, error: fetchError } = await supabase
             .from("posts")
             .select("author, author_role")
@@ -394,21 +394,17 @@ export async function deletePost(
             return false;
         }
 
-        // Strict ownership check - must match BOTH nickname AND role
-        if (
-            post.author !== currentUserNickname ||
-            post.author_role !== currentUserRole
-        ) {
+        // Only check role - any user with the same role can delete posts from that role
+        if (post.author_role !== currentUserRole) {
             console.error("Unauthorized deletion attempt:", {
-                postAuthor: post.author,
                 postAuthorRole: post.author_role,
-                requestingUser: currentUserNickname,
                 requestingRole: currentUserRole,
+                message: "Only users with the same role can delete posts",
             });
             return false;
         }
 
-        // If owner matches, proceed with deletion
+        // If role matches, proceed with deletion
         const { error } = await supabase
             .from("posts")
             .delete()
@@ -426,7 +422,7 @@ export async function deletePost(
     }
 }
 
-// Delete a comment from a post - only if the current user is the exact same user who created it
+// Delete a comment from a post - any user with the same role can delete
 export async function deleteCommentFromPost(
     postId: string,
     commentId: string,
@@ -457,7 +453,7 @@ export async function deleteCommentFromPost(
             return false;
         }
 
-        // Find the comment and verify ownership
+        // Find the comment
         const commentToDelete = post.comments.find(
             (comment) => comment.id === commentId
         );
@@ -467,21 +463,17 @@ export async function deleteCommentFromPost(
             return false;
         }
 
-        // Strict ownership check - must match BOTH nickname AND role
-        if (
-            commentToDelete.author !== currentUserNickname ||
-            commentToDelete.author_role !== currentUserRole
-        ) {
+        // Only check role - any user with the same role can delete comments from that role
+        if (commentToDelete.author_role !== currentUserRole) {
             console.error("Unauthorized comment deletion attempt:", {
-                commentAuthor: commentToDelete.author,
                 commentAuthorRole: commentToDelete.author_role,
-                requestingUser: currentUserNickname,
                 requestingRole: currentUserRole,
+                message: "Only users with the same role can delete comments",
             });
             return false;
         }
 
-        // Only after verifying ownership, filter out the comment
+        // Only after verifying role, filter out the comment
         const updatedComments = post.comments.filter(
             (comment) => comment.id !== commentId
         );

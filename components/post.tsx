@@ -226,10 +226,8 @@ export function Post({
         await onDeleteComment(post.id, commentId);
     };
 
-    // Strict comparison to check if the current user is the exact author of the post
-    const isCurrentUserExactAuthor = user
-        ? user.nickname === post.author && user.role === post.authorRole
-        : false;
+    // Check if current user has the same role as the post author
+    const canDeletePost = user ? user.role === post.authorRole : false;
 
     return (
         <div className="rounded-xl border shadow bg-white dark:bg-gray-900">
@@ -260,8 +258,8 @@ export function Post({
                         <div className="flex items-center gap-2">
                             <ClientSideTime timestamp={post.timestamp} />
 
-                            {/* Delete Post Button - Only show if user is the EXACT author (same nickname AND role) */}
-                            {isCurrentUserExactAuthor && (
+                            {/* Delete Post Button - Only show for users with the same role */}
+                            {canDeletePost && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button
@@ -395,10 +393,9 @@ export function Post({
                         {post.comments.length > 0 && (
                             <div className="space-y-3">
                                 {post.comments.map((comment) => {
-                                    // Strict comparison for comment authorship - check both nickname AND role
-                                    const isExactCommentAuthor = user
-                                        ? user.nickname === comment.author &&
-                                          user.role === comment.authorRole
+                                    // Check if user has the same role as the comment author
+                                    const canDeleteComment = user
+                                        ? user.role === comment.authorRole
                                         : false;
 
                                     // Get the comment author display name
@@ -458,8 +455,8 @@ export function Post({
                                                         />
                                                     </span>
 
-                                                    {/* Delete Comment Button - Only show if user is the EXACT author */}
-                                                    {isExactCommentAuthor && (
+                                                    {/* Delete Comment Button - Only show for users with the same role */}
+                                                    {canDeleteComment && (
                                                         <AlertDialog>
                                                             <AlertDialogTrigger
                                                                 asChild
