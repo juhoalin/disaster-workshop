@@ -5,6 +5,10 @@ const { createClient } = require("@supabase/supabase-js");
 const fs = require("fs");
 require("dotenv").config({ path: ".env.local" });
 
+// Import our user roles - note: require is used because this is a Node.js script
+// We're requiring the compiled JS file, not the TS file
+const userRoles = require("./lib/user-roles.js");
+
 async function initSupabase() {
     console.log("Starting Supabase initialization...");
 
@@ -65,7 +69,7 @@ async function initSupabase() {
         const samplePost = {
             id: crypto.randomUUID(),
             author: "System",
-            authorRole: "Admin",
+            authorRole: "Government", // This should match a value from USER_ROLES
             content:
                 "Welcome to the application! This is an automatically generated first post.",
             timestamp: new Date().toISOString(),

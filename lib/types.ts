@@ -1,4 +1,4 @@
-export type UserRole = "Journalist" | "Citizen" | "Government" | "Troll";
+import { UserRole } from "./user-roles";
 
 export interface UserData {
     nickname: string;

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { Post } from "@/components/post";
 import { CreatePost } from "@/components/create-post";
-import type { PostType, UserRole } from "@/lib/types";
+import type { PostType } from "@/lib/types";
+import { UserRole } from "@/lib/user-roles";
 import { useUser } from "@/lib/user-context";
 import {
     fetchPosts,

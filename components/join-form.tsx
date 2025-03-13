@@ -18,12 +18,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import type { UserRole } from "@/lib/types";
 import { useUser } from "@/lib/user-context";
+import {
+    UserRole,
+    DEFAULT_ROLE,
+    USER_ROLES,
+    ROLE_DISPLAY_NAMES,
+    ROLE_DESCRIPTIONS,
+} from "@/lib/user-roles";
 
 export function JoinForm() {
     const [nickname, setNickname] = useState("");
-    const [role, setRole] = useState<UserRole>("Citizen");
+    const [role, setRole] = useState<UserRole>(DEFAULT_ROLE);
     const { user, login, logout, cancelUserChange, isChangingUser } = useUser();
 
     const handleJoin = (e: React.FormEvent) => {
@@ -37,7 +43,7 @@ export function JoinForm() {
         logout();
         // Reset form fields for new user
         setNickname("");
-        setRole("Citizen");
+        setRole(DEFAULT_ROLE);
     };
 
     const handleCancel = () => {
@@ -97,14 +103,15 @@ export function JoinForm() {
                                 <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Journalist">
-                                    Journalist
-                                </SelectItem>
-                                <SelectItem value="Citizen">Citizen</SelectItem>
-                                <SelectItem value="Government">
-                                    Government
-                                </SelectItem>
-                                <SelectItem value="Troll">Troll</SelectItem>
+                                {USER_ROLES.map((roleOption) => (
+                                    <SelectItem
+                                        key={roleOption}
+                                        value={roleOption}
+                                        title={ROLE_DESCRIPTIONS[roleOption]}
+                                    >
+                                        {ROLE_DISPLAY_NAMES[roleOption]}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>

@@ -9,9 +9,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { PostType, UserRole } from "@/lib/types";
+import type { PostType } from "@/lib/types";
 import { useUser } from "@/lib/user-context";
 import { cn } from "@/lib/utils";
+import {
+    UserRole,
+    getRoleCardBackground,
+    getRoleBadgeStyle,
+} from "@/lib/user-roles";
 
 interface PostProps {
     post: PostType;
@@ -55,19 +60,6 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
     const { user, isChangingUser } = useUser();
-
-    const getRoleColor = (role: string) => {
-        switch (role) {
-            case "Admin":
-                return "bg-red-50 dark:bg-red-950/30";
-            case "Moderator":
-                return "bg-green-50 dark:bg-green-950/30";
-            case "VIP":
-                return "bg-purple-50 dark:bg-purple-950/30";
-            default:
-                return "";
-        }
-    };
 
     const hasLiked = user ? post.likes.includes(user.nickname) : false;
 
@@ -113,7 +105,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
     };
 
     return (
-        <Card className={cn(getRoleColor(post.authorRole))}>
+        <Card className={cn(getRoleCardBackground(post.authorRole))}>
             <CardHeader className="flex flex-row items-start gap-4 space-y-0">
                 <Avatar>
                     <AvatarFallback>{getInitials(post.author)}</AvatarFallback>
@@ -124,13 +116,7 @@ export function Post({ post, onLike, onComment }: PostProps) {
                         <span
                             className={cn(
                                 "text-xs ml-2 px-2 py-0.5 rounded-full",
-                                post.authorRole === "Admin"
-                                    ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                                    : post.authorRole === "Moderator"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                    : post.authorRole === "VIP"
-                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                                    : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                                getRoleBadgeStyle(post.authorRole)
                             )}
                         >
                             {post.authorRole}
@@ -193,16 +179,9 @@ export function Post({ post, onLike, onComment }: PostProps) {
                                                 <span
                                                     className={cn(
                                                         "text-xs ml-1 px-1.5 py-0.5 rounded-full",
-                                                        comment.authorRole ===
-                                                            "Admin"
-                                                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                                                            : comment.authorRole ===
-                                                              "Moderator"
-                                                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                                            : comment.authorRole ===
-                                                              "VIP"
-                                                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                                                            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                                                        getRoleBadgeStyle(
+                                                            comment.authorRole
+                                                        )
                                                     )}
                                                 >
                                                     {comment.authorRole}
