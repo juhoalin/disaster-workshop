@@ -1,13 +1,32 @@
 import { Feed } from "@/components/feed";
+import { ActiveUsersList } from "@/components/active-users-list";
 
 export default function Home() {
     return (
         <main className="min-h-screen bg-background">
-            <div className="container max-w-2xl mx-auto py-4 px-4 sm:py-6 sm:px-0">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold">Disaster Social</h1>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col lg:flex-row gap-6 pt-4">
+                    {/* Left sidebar with sticky app title */}
+                    <div className="lg:w-1/6 lg:sticky lg:top-0 h-fit">
+                        <div className="py-2 mt-0.5">
+                            <h1 className="text-3xl font-bold">
+                                Disaster Social
+                            </h1>
+                        </div>
+                    </div>
+
+                    {/* Main feed content */}
+                    <div className="lg:w-3/5">
+                        <Feed />
+                    </div>
+
+                    {/* Right sidebar with active users */}
+                    <div className="lg:w-1/4 lg:sticky lg:top-0 h-fit">
+                        <div className="mt-0.5">
+                            <ActiveUsersList />
+                        </div>
+                    </div>
                 </div>
-                <Feed />
             </div>
         </main>
     );
