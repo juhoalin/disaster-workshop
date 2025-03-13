@@ -19,6 +19,11 @@ import {
     getRoleCardBackground,
     getRoleBadgeStyle,
 } from "@/lib/user-roles";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 const MAX_COMMENT_LENGTH = 280;
 
@@ -69,6 +74,64 @@ export function Post({ post, onLike, onComment }: PostProps) {
     const isOverLimit = charactersLeft < 0;
 
     const hasLiked = user ? post.likes.includes(user.nickname) : false;
+
+    // Get lowercase role name for image mapping for likes popover
+    const getLikerRoleImage = (likerName: string) => {
+        // Since we don't have direct access to all users' roles,
+        // we can check if the liker is the post author
+        if (likerName === post.author) {
+            return post.authorRole.toLowerCase();
+        }
+
+        // Check if the liker has commented on the post
+        const comment = post.comments.find((c) => c.author === likerName);
+        if (comment) {
+            return comment.authorRole.toLowerCase();
+        }
+
+        // If the current user has liked the post, use their role
+        if (user && likerName === user.nickname) {
+            return user.role.toLowerCase();
+        }
+
+        // Default if we can't determine the role
+        return "other";
+    };
+
+    // Get the role for a liker
+    const getLikerRole = (likerName: string): UserRole => {
+        // Check if the liker is the post author
+        if (likerName === post.author) {
+            return post.authorRole as UserRole;
+        }
+
+        // Check if the liker has commented on the post
+        const comment = post.comments.find((c) => c.author === likerName);
+        if (comment) {
+            return comment.authorRole as UserRole;
+        }
+
+        // If the current user has liked the post, use their role
+        if (user && likerName === user.nickname) {
+            return user.role;
+        }
+
+        // Default if we can't determine the role
+        return "Other";
+    };
+
+    // Get display name for a liker
+    const getLikerDisplayName = (likerName: string): string => {
+        const role = getLikerRole(likerName);
+
+        // If the nickname matches a display name, it's likely a user who should keep their nickname
+        if (Object.values(ROLE_DISPLAY_NAMES).includes(likerName)) {
+            return likerName;
+        }
+
+        // Return the role-based display name or fallback to the nickname
+        return ROLE_DISPLAY_NAMES[role] || likerName;
+    };
 
     const handleLikeClick = async () => {
         if (!user) return;
@@ -157,21 +220,77 @@ export function Post({ post, onLike, onComment }: PostProps) {
             <CardFooter className="flex flex-col border-t pt-4 bg-transparent">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1"
-                            onClick={handleLikeClick}
-                            disabled={!user || isLiking}
-                        >
-                            <Heart
-                                className={cn(
-                                    "h-4 w-4",
-                                    hasLiked ? "fill-red-500 text-red-500" : ""
-                                )}
-                            />
-                            <span>{post.likes.length}</span>
-                        </Button>
+                        <div className="flex items-center">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex items-center gap-1 pr-1"
+                                onClick={handleLikeClick}
+                                disabled={!user || isLiking}
+                            >
+                                <Heart
+                                    className={cn(
+                                        "h-4 w-4",
+                                        hasLiked
+                                            ? "fill-red-500 text-red-500"
+                                            : ""
+                                    )}
+                                />
+                                <span>{post.likes.length}</span>
+                            </Button>
+
+                            {post.likes.length > 0 && (
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="pl-0 text-muted-foreground hover:text-foreground underline-offset-4"
+                                        >
+                                            Likes
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-64 p-0">
+                                        <div className="p-4">
+                                            <h4 className="font-medium mb-2">
+                                                Liked by
+                                            </h4>
+                                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                                                {post.likes.map((liker) => (
+                                                    <div
+                                                        key={liker}
+                                                        className="flex items-center gap-2"
+                                                    >
+                                                        <Avatar className="h-6 w-6">
+                                                            <AvatarImage
+                                                                src={`/profile-images/${getLikerRoleImage(
+                                                                    liker
+                                                                )}.jpg`}
+                                                                alt={liker}
+                                                                className="object-cover"
+                                                            />
+                                                            <AvatarFallback>
+                                                                {liker
+                                                                    .substring(
+                                                                        0,
+                                                                        2
+                                                                    )
+                                                                    .toUpperCase()}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <span className="text-sm">
+                                                            {getLikerDisplayName(
+                                                                liker
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            )}
+                        </div>
                         <Button
                             variant="ghost"
                             size="sm"
