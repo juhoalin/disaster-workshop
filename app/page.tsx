@@ -1,6 +1,4 @@
 import { Feed } from "@/components/feed";
-import { JoinForm } from "@/components/join-form";
-import Link from "next/link";
 
 export default function Home() {
     return (
@@ -9,7 +7,6 @@ export default function Home() {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">Disaster Social</h1>
                 </div>
-                <JoinForm />
                 <Feed />
             </div>
         </main>

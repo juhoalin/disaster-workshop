@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Post } from "@/components/post";
-import { CreatePost } from "@/components/create-post";
+import { UserAndCreatePost } from "@/components/user-and-create-post";
 import type { PostType } from "@/lib/types";
 import { UserRole } from "@/lib/user-roles";
 import { useUser } from "@/lib/user-context";
@@ -140,7 +140,7 @@ export function Feed() {
         }
     };
 
-    const addComment = async (
+    const handleComment = async (
         postId: string,
         comment: {
             id: string;
@@ -208,25 +208,38 @@ export function Feed() {
         }
     };
 
-    if (isLoading) {
-        return <div className="text-center py-8">Loading posts...</div>;
-    }
-
-    if (error) {
-        return <div className="text-center py-8 text-red-500">{error}</div>;
-    }
-
     return (
-        <div className="space-y-6">
-            <CreatePost onPostCreated={addPost} />
-            {posts.map((post) => (
-                <Post
-                    key={post.id}
-                    post={post}
-                    onLike={handleLike}
-                    onComment={addComment}
-                />
-            ))}
+        <div className="space-y-4">
+            <UserAndCreatePost onPostCreated={addPost} />
+
+            {isLoading ? (
+                <div className="text-center p-8">
+                    <span className="text-muted-foreground">Loading...</span>
+                </div>
+            ) : error ? (
+                <div className="text-center p-8 text-red-500">{error}</div>
+            ) : posts.length === 0 ? (
+                <div className="text-center p-8">
+                    <span className="text-muted-foreground">
+                        No posts yet. Be the first to post!
+                    </span>
+                </div>
+            ) : (
+                posts
+                    .sort(
+                        (a, b) =>
+                            new Date(b.timestamp).getTime() -
+                            new Date(a.timestamp).getTime()
+                    )
+                    .map((post) => (
+                        <Post
+                            key={post.id}
+                            post={post}
+                            onLike={handleLike}
+                            onComment={handleComment}
+                        />
+                    ))
+            )}
         </div>
     );
 }
