@@ -21,15 +21,15 @@ function UserProviderFallback() {
 
 export const metadata: Metadata = {
     title: "Disaster Social",
-    description: "Share and discuss information during crisis events",
+    description: "Make distasters great again",
     keywords: ["disaster", "crisis", "social media", "emergency information"],
-    authors: [{ name: "Disaster Social Team" }],
+    authors: [{ name: "G8" }],
     icons: {
         icon: "/favicon.ico",
     },
     openGraph: {
         title: "Disaster Social",
-        description: "Connect and share critical information during disasters",
+        description: "Make distasters great again",
         url: "https://disaster-social.vercel.app",
         siteName: "Disaster Social",
         locale: "en_US",
