@@ -5,10 +5,13 @@ import Link from "next/link";
 import { ROLE_PARAMS } from "@/lib/role-params";
 
 export default function RoleInfoPage() {
-    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-    const [currentUrl, setCurrentUrl] = useState<string>(baseUrl);
+    // Initialize URL state
+    const [currentUrl, setCurrentUrl] = useState<string>("");
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        // This only runs on the client
+        setIsClient(true);
         setCurrentUrl(window.location.origin);
     }, []);
 
@@ -54,7 +57,7 @@ export default function RoleInfoPage() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Link
                                     </th>
-                                </tr>f
+                                </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {ROLE_PARAMS.map((roleParam) => (
@@ -93,7 +96,8 @@ export default function RoleInfoPage() {
                                 href="/"
                                 className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                                Default (Other role): {`${currentUrl}/`}
+                                Default (Other role):{" "}
+                                {isClient ? `${currentUrl}/` : ""}
                             </Link>
                         </li>
                         <li>
@@ -101,7 +105,10 @@ export default function RoleInfoPage() {
                                 href="/?role=journalist"
                                 className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                                Journalist: {`${currentUrl}/?role=journalist`}
+                                Journalist:{" "}
+                                {isClient
+                                    ? `${currentUrl}/?role=journalist`
+                                    : ""}
                             </Link>
                         </li>
                         <li>
@@ -109,7 +116,10 @@ export default function RoleInfoPage() {
                                 href="/?role=government"
                                 className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                                Government: {`${currentUrl}/?role=government`}
+                                Government:{" "}
+                                {isClient
+                                    ? `${currentUrl}/?role=government`
+                                    : ""}
                             </Link>
                         </li>
                     </ul>

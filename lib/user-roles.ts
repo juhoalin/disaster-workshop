@@ -41,7 +41,7 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
     Journalist: "Kalle Keskiaukeama",
     Government: "Anna Halin",
     Troll: "Juuso Halpa-Halko",
-    Health: "Vika Salminen",
+    Health: "Mika Tautinen",
     Student: "Kreetta Ukkosmyrsky",
     Influencer: "Sara Kalikka",
     Emergency: "112",
@@ -53,13 +53,13 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
 export const BADGE_DISPLAY_TEXT: Record<UserRole, string> = {
     Journalist: "Yle Journalist",
     Government: "Prime Minister",
-    Troll: "Political Troll",
+    Troll: "Citizen",
     Health: "THL Official",
     Student: "Aalto Student",
-    Influencer: "Lifestyle Influencer",
+    Influencer: "Influencer",
     Emergency: "Emergency Services",
-    Conspiracy: "Truth Seeker",
-    Other: "Citizen",
+    Conspiracy: "Conspiracy Theorist",
+    Other: "User",
 };
 
 // Role descriptions
